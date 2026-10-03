@@ -114,7 +114,7 @@ AGT's compatibility shim, host SDKs and policy tooling live under
 The decision engine source lives in
 [`responsibleai/agent-control-spec`](https://github.com/responsibleai/agent-control-spec).
 AGT consumes a registry release rather than maintaining a second engine.
-See the [retarget guide](../../policy-engine/docs/acs-retarget.md) for the
+See the [retarget guide](https://github.com/microsoft/agent-governance-toolkit/blob/main/policy-engine/docs/acs-retarget.md) for the
 exact pin and compatibility restrictions.
 
 ## How Python hosts call ACS
