@@ -1,6 +1,12 @@
 # Agent Control Specification Node SDK
 
-Phase A exposes the synchronous Rust core through a thin napi-rs binding. Build the native addon before using the package locally:
+This `agent-control-specification` package preserves AGT's Node host API through
+a napi-rs binding over the Rust host SDK and published
+[`agent-control-spec`](https://github.com/responsibleai/agent-control-spec)
+engine. The standalone upstream package is
+`@responsibleai/agent-control-spec`. Its interceptor API is not a drop-in
+replacement for AGT's `AgentControl` adapters. Build the native addon before
+using this package locally:
 
 ```sh
 npm install

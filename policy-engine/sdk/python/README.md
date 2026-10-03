@@ -2,9 +2,19 @@
 
 ## What is the Agent Control Specification?
 
-Agent Control Specification (ACS) is a stateless, deterministic, fail-closed policy decision runtime for agent security. At each of eight intervention points across the agent loop, `Input -> Model -> Tool Call -> Tool Result -> Output`, the host submits a complete snapshot and policy manifest, then receives a normalized verdict. Verdicts are `allow`, `warn`, `deny`, `escalate`, or `transform`, with runtime errors failing closed to `deny` and no transform. This SDK is the thin Python surface over the Rust core, and ACS is vendored into AGT's `policy-engine/` as the AGT 5.0 policy layer. See the [policy engine overview](../../README.md) for where it fits with Agent OS as the kernel and host.
+This package, `agent-control-specification`, is AGT's Python host SDK over the
+published [`agent-control-spec`](https://github.com/responsibleai/agent-control-spec)
+engine. It preserves `AgentControl`, `HostSession` and the AGT framework adapters.
+The standalone upstream Python package is named `agent-control-spec` and imports
+as `agent_control_spec`. It exposes different APIs and is not a drop-in package
+rename for this SDK.
 
-This package is the thin Python surface for the stateless Agent Control Specification runtime.
+ACS returns `allow`, `deny`, or `transform`. A warning is metadata on `allow`,
+and an approval request is metadata on a liftable `deny`. AGT's host applies
+transforms and resolves approvals. Legacy `WARN` and `ESCALATE` enum members
+remain for compatibility with existing callers, not as additional engine
+verdicts. See the [policy engine overview](../../README.md) and the
+[agent-hooks contract](https://github.com/responsibleai/agent-hooks).
 
 It intentionally owns Python async orchestration and host/framework integration while the native core owns deterministic intervention point evaluation. `AgentControl.from_path("manifest.yaml")` builds a control backed by the bundled Rust core through the `_native` extension. The release pipeline produces CPython 3.11+ ABI3 wheels for Linux x86_64 and ARM64 with glibc 2.28 or newer, macOS Intel and Apple Silicon, and Windows x86_64. Installing one of those wheels does not require Rust. On other platforms pip falls back to the source distribution and builds the extension locally with maturin and Rust. The default OPA policy dispatcher is wired automatically. Pass `policy_dispatcher=` to use host-specific policy logic. Manifests declaring annotators also require a host `annotator_dispatcher=` unless the extension was built with `bundled-dispatchers`.
 

@@ -1,16 +1,29 @@
 # Agent Control Specification
 
+This is AGT's compatibility profile. The canonical decision-engine contract is
+maintained in the
+[upstream ACS specification](https://github.com/responsibleai/agent-control-spec/blob/main/spec/SPECIFICATION.md).
+[Agent Hooks](https://github.com/responsibleai/agent-hooks) defines the
+interceptor and host contract. Consult the [retarget guide](../docs/acs-retarget.md)
+for the exact engine pin and restrictions of this compatibility layer.
+
 This document specifies the runtime semantics AGT hosts against. The engine is the `agent-control-spec` crate, pinned at 0.4.0-alpha.3. Its accepted manifest `agent_control_specification_version` remains 0.4.0-alpha.1. Its status is Draft.
 
-The machine readable manifest contract is `schema/manifest.schema.json` in artifact kits and `spec/schema/manifest.schema.json` in this repository. That schema governs manifest syntax. This document governs runtime semantics, which are the evaluation order, the policy input shape, verdict handling, transform application, and fail closed behavior.
+The machine readable AGT compatibility schema is `schema/manifest.schema.json`
+in artifact kits and `spec/schema/manifest.schema.json` in this repository.
+AGT's tooling checks that schema and the pinned engine's typed validation.
+This document records the host profile, including AGT's enforcement and
+approval handling.
 
 The key words MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD, SHOULD NOT, RECOMMENDED, NOT RECOMMENDED, MAY, and OPTIONAL in this document are to be interpreted as described in BCP 14 [RFC 2119] [RFC 8174] when, and only when, they appear in all capitals, as shown here. The references are listed in section 23.
 
 ## 1. Model
 
-ACS evaluates one intervention point of one agent at a time. The host assembles a complete JSON snapshot for that intervention point and calls the runtime. The runtime selects the value under evaluation, attaches host supplied annotations, calls a host supplied policy dispatcher, normalizes the result into a verdict, and validates any transform the verdict carries. In enforce mode a `transform` verdict produces a transformed policy target.
+ACS evaluates one intervention point of one agent at a time. The host assembles a complete JSON snapshot for that intervention point and calls the runtime. The runtime selects the value under evaluation, attaches host supplied annotations, calls a host supplied policy dispatcher, normalizes the result into a verdict, and validates any transform the verdict carries. In enforce mode the AGT host SDK applies a `transform` verdict to produce the transformed policy target.
 
-The runtime computes verdicts and produces a transformed policy target. Acting on a verdict, by allowing, transforming, escalating, or refusing the action under control, happens at the host integration boundary defined in section 17. The ACS SDKs implement that boundary in their adapters, so a host that wraps an action in an adapter gets enforcement without writing it by hand.
+The engine returns a verdict and policy input. Acting on that verdict happens
+at the host integration boundary defined in section 17. AGT's host SDKs apply
+transforms and resolve approvals before their guarded operations proceed.
 
 ### 1.1 Invariants
 
@@ -28,7 +41,9 @@ This section defines the terms this document uses with a specific meaning. Every
 
 **Host.** The application that embeds ACS. The host assembles snapshots, calls the runtime, supplies dispatchers, and acts on verdicts. The ACS SDK adapters run inside the host and perform that integration on its behalf.
 
-**Runtime.** The stateless, deterministic engine defined by this document. The runtime computes a verdict and an optional transformed policy target and performs no input or output of its own.
+**Runtime.** The stateless decision engine. It computes a verdict and policy
+input. Dispatchers perform policy and annotator I/O, and the host applies any
+transform.
 
 **Snapshot.** The complete JSON document the host assembles for one intervention point. It is the only input the runtime reads about the agent and its environment.
 
