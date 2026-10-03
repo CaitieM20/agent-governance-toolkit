@@ -129,6 +129,13 @@ is the upstream policy decision runtime used by AGT. AGT's compatibility
 Python SDK supplies `AgentControl` and `HostSession`. From a repository
 checkout, install that SDK before running the example below.
 
+The engine moved to
+[`responsibleai/agent-control-spec`](https://github.com/responsibleai/agent-control-spec)
+so AGT no longer maintains a separate copy of policy evaluation. AGT keeps the
+adapters and host enforcement. The
+[Agent Hooks contract](https://github.com/responsibleai/agent-hooks) defines
+how hosts and interceptors exchange context and verdicts.
+
 ```bash
 python -m pip install ./policy-engine/sdk/python
 ```

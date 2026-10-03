@@ -25,6 +25,11 @@ each evaluation. ACS returns a normalized verdict and the host enforces it.
 [Agent Hooks](https://github.com/responsibleai/agent-hooks) defines the
 interception contract shared by the engine and its hosts.
 
+The engine moved upstream so fixes to policy evaluation can be shared through
+registry releases. AGT keeps its host APIs and framework integrations. That
+lets the engine and the adapters evolve without maintaining two copies of the
+decision logic.
+
 The Rust core exposes bindings through C-ABI, PyO3, napi, and P-Invoke. AGT
 includes SDKs for Python, Node.js, .NET, and Rust.
 

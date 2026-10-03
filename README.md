@@ -80,6 +80,8 @@ The policy engine is published upstream as
 [`agent-hooks`](https://github.com/responsibleai/agent-hooks) defines its
 interception contract. AGT retains the `AgentControl` host APIs and framework
 adapters in [`policy-engine/`](policy-engine/), not a second decision engine.
+This keeps policy evaluation in one place. AGT can adopt upstream fixes through
+a dependency update while keeping its host APIs and framework integrations.
 See the [ACS package guide](docs/packages/agent-control-specification.md) for
 the distinction between upstream packages and AGT's compatibility SDKs.
 
