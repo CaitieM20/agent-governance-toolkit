@@ -306,8 +306,9 @@ jobs:
   # `check sources` so the gate stays deterministic and does not flake
   # on time-varying advisory data; advisories, licenses and bans are
   # intentionally left out of CI for now.
-  # Covers the AGT Rust workspace and the standalone prompt-injection
-  # benchmark harness, which reuse agent-governance-rust/deny.toml.
+  # Covers both Rust workspaces (policy-engine, agent-governance-rust) and
+  # the two standalone manifests (policy-engine/examples/coding_agent/app and
+  # the prompt-injection benchmark harness), which reuse policy-engine/deny.toml.
   # ------------------------------------------------------------------
   cargo-source-policy:
     name: Cargo source policy (cargo-deny)
@@ -332,7 +333,12 @@ jobs:
           tar -xzf "$archive" -C "$RUNNER_TEMP"
           install -m755 "$RUNNER_TEMP/${dir}/cargo-deny" "$RUNNER_TEMP/cargo-deny"
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      - name: cargo deny check sources (policy-engine)
+        run: cargo-deny --manifest-path policy-engine/Cargo.toml --all-features check sources
       - name: cargo deny check sources (agent-governance-rust)
         run: cargo-deny --manifest-path agent-governance-rust/Cargo.toml --all-features check sources
+      # Standalone manifests outside the two workspaces reuse policy-engine/deny.toml.
+      - name: cargo deny check sources (coding_agent example)
+        run: cargo-deny --manifest-path policy-engine/examples/coding_agent/app/Cargo.toml --config policy-engine/deny.toml --all-features check sources
       - name: cargo deny check sources (prompt-injection benchmark harness)
-        run: cargo-deny --manifest-path benchmarks/prompt-injection/harness/agt-rules-baseline/Cargo.toml --config agent-governance-rust/deny.toml --all-features check sources
+        run: cargo-deny --manifest-path benchmarks/prompt-injection/harness/agt-rules-baseline/Cargo.toml --config policy-engine/deny.toml --all-features check sources
