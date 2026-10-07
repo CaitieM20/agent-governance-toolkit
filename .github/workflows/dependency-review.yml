@@ -24,9 +24,8 @@ jobs:
         with:
           fail-on-severity: moderate
           comment-summary-in-pr: always
-          # The vendored Agent Control Specification engine (policy-engine/**)
-          # brings a Rust dependency tree whose transitive crates carry a few
-          # permissive licenses not originally on this list. Each was reviewed
+          # The Rust workspace dependency tree includes transitive crates with
+          # permissive licenses not otherwise on this list. Each was reviewed
           # and added explicitly so the policy change is visible in review:
           #   - Unicode-3.0: Unicode Consortium license used by the ICU/zerovec
           #     family (icu_*, tinystr, yoke, zerovec, unicode-ident, ...).

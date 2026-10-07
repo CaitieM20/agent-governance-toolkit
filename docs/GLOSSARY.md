@@ -12,7 +12,7 @@ Technical terms used across the Agent Governance Toolkit, its specifications, an
 
 ### A
 
-* **Agent Control Specification (ACS)**: The stateless, deterministic, fail-closed policy decision runtime at the core of AGT's policy layer. A Rust core evaluates a complete host-supplied snapshot at intervention points across the agent loop and returns a normalized verdict (allow, warn, deny, escalate, or transform). Vendored into `policy-engine/` as the AGT 5.0 policy layer.
+* **Agent Control Specification (ACS)**: The standalone, stateless, deterministic, fail-closed policy decision runtime. Its Rust core evaluates a complete host-supplied snapshot at intervention points across the agent loop and returns a normalized verdict (allow, warn, deny, escalate, or transform). AGT consumes its published packages; source and specifications live in the [standalone project](https://github.com/responsibleai/agent-control-spec).
 * **Agent Identity**: A cryptographic identity (Ed25519 key pair) that uniquely identifies an agent. Every governance action is tied to a verified identity.
 * **Agent OS**: The core governance runtime that hosts the policy engine, lifecycle management, and governance gate. All agent actions pass through Agent OS before execution.
 * **AgentMesh**: The trust and coordination layer that handles agent discovery, routing, delegation, and inter-agent communication with cryptographic verification.

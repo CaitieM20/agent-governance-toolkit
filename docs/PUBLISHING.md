@@ -117,11 +117,10 @@ Canonical crates currently include:
 |---|---|
 | `agentmesh` | `agent-governance-rust/agentmesh` |
 | `agentmesh-mcp` | `agent-governance-rust/agentmesh-mcp` |
-| `agent_control_specification_core` | `policy-engine/core` |
-| `agent_control_specification` | `policy-engine/sdk/rust` |
 
-Crate ownership must be transferred or delegated to foundation/project release
-managers before canonical AAIF publication.
+The Agent Control Specification crates are published by the standalone
+[ACS project](https://github.com/responsibleai/agent-control-spec); they are
+not built or released from this repository.
 
 ## Go module
 

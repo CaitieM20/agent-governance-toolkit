@@ -4,7 +4,9 @@
 
 Cover the contract documented in
 the private migration ``AGT-RESOLUTION-1.0.md`` contract and the reserved
-resolution reasons in ``policy-engine/spec/SPECIFICATION.md`` §16.
+resolution reasons in the
+`standalone ACS specification <https://github.com/responsibleai/agent-control-spec/blob/main/spec/SPECIFICATION.md>`_
+§16.
 The render-level regressions below complement the OPA-backed scenarios under
 ``tests/scenarios``.
 """

@@ -35,11 +35,12 @@ From the repository root:
 ```bash
 python -m venv .venv
 . .venv/bin/activate
-pip install ./policy-engine/sdk/python
+pip install agent-control-specification==0.4.0b0
 pip install pytest
 ```
 
-The Python SDK provides `AgentControl`, `HostSession`, and `SnapshotBuilder`.
+The [standalone ACS Python SDK](https://github.com/responsibleai/agent-control-spec)
+provides `AgentControl`, `HostSession`, and `SnapshotBuilder`.
 The host session builds snapshots and returns the native ACS
 `InterventionPointResult`.
 

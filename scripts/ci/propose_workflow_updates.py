@@ -36,9 +36,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 GENERATOR_PATH = Path(__file__).resolve().parent / "generate_workflows.py"
 
 # Map a changed top level area to the workflow job it should be covered by.
-AREA_COVERAGE = {
-    "policy-engine": "policy-engine-ci",
-}
+AREA_COVERAGE: dict[str, str] = {}
 
 
 def _load_generator():

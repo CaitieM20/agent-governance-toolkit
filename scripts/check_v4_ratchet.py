@@ -23,10 +23,10 @@ match. A narrow structural check catches renamed intent-policy interpreters
 that combine blocked patterns, tool lists, budgets, and pattern modes. Any
 Python file that cannot be decoded or parsed fails the gate closed.
 
-Rust and TypeScript use identifier-boundary token matching. Markdown, the
-normative AGT spec layer, v4 ``governance.yaml`` artifacts, and declarative v4
-``PolicyDocument`` YAML/JSON policy files are scanned so the docs, spec, and
-policy-data purge obligations are visible to the zero gate.
+Rust and TypeScript use identifier-boundary token matching. Markdown, v4
+``governance.yaml`` artifacts, and declarative v4 ``PolicyDocument`` YAML/JSON
+policy files are scanned so the docs and policy-data purge obligations are
+visible to the zero gate.
 
 v4 policy language may survive only inside the isolated one-way migration
 tool and the removal plan doc (``ALLOWED_V4_FILES`` plus the dedicated
@@ -233,11 +233,6 @@ EXCLUDE_DIR_NAMES: frozenset[str] = frozenset(
         "third_party",
     }
 )
-# policy-engine is the vendored v5 ACS engine, excluded EXCEPT its normative
-# spec layer, which is a confirmed v4 obligation surface.
-EXCLUDE_TOP_DIRS: frozenset[str] = frozenset({"policy-engine"})
-SPEC_INCLUDE_PREFIX = "policy-engine/spec/"
-
 GOVERNANCE_YAML_NAMES: frozenset[str] = frozenset({"governance.yaml", "governance.yml"})
 PACKAGE_MARKERS: tuple[str, ...] = ("pyproject.toml", "Cargo.toml", "package.json")
 IDENT_PATH_RE = re.compile(r"^[A-Za-z_][\w.]*$")
@@ -271,11 +266,6 @@ def decide_scanner(path: Path) -> str | None:
     if any(part in EXCLUDE_DIR_NAMES for part in parts):
         return None
     suffix = path.suffix
-    in_excluded_top = bool(parts) and parts[0] in EXCLUDE_TOP_DIRS
-    if in_excluded_top:
-        if suffix == ".md" and rel.startswith(SPEC_INCLUDE_PREFIX):
-            return "spec"
-        return None
     if suffix == ".py":
         return "python"
     if suffix in (".rs", ".ts", ".tsx"):

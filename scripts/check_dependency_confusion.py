@@ -62,7 +62,6 @@ REGISTERED_PACKAGES = {
     "agt-sandbox", "agt_sandbox",
     "agt-policies", "agt_policies",
     "agent-control-specification", "agent_control_specification",
-    "acs-generator", "acs_generator",
     "k8s-agent-sandbox", "k8s_agent_sandbox",
     # Common dependencies
     "pydantic", "pyyaml", "cryptography", "pynacl", "httpx", "aiohttp",
@@ -159,7 +158,7 @@ REGISTERED_PACKAGES = {
     # instead of path references. See dependency confusion attack vector.
     "agent-primitives", "agent-mcp-governance", "agent_mcp_governance", "emk",
     "agentmesh-primitives", "agentmesh_primitives",
-    # Vendored ACS policy-engine SDK/generator deps (all real PyPI packages)
+    # Dependencies used by the standalone ACS SDK and AGT integrations.
     "litellm", "semantic-kernel", "semantic_kernel",
     "autogen-agentchat", "autogen_agentchat",
     "autogen-core", "autogen_core", "autogen-ext", "autogen_ext",
@@ -237,7 +236,7 @@ REGISTERED_NPM_PACKAGES = {
     # npm deps from agent-os-vscode
     "@types/glob", "@types/mocha", "@vscode/test-electron",
     "autoprefixer", "glob", "mocha", "postcss", "tailwindcss",
-    # Vendored ACS policy-engine node SDK deps (all real npm packages)
+    # Dependencies used by the standalone ACS SDK and AGT integrations.
     "@langchain/core", "langchain", "@openai/agents",
     "@napi-rs/cli",
 }
@@ -257,7 +256,7 @@ REGISTERED_CARGO_PACKAGES = {
     #   agent-control-spec  =0.4.0-alpha.3
     #   agent-hooks-sdk     =0.1.0-alpha.5
     "agent-control-spec", "agent-hooks-sdk",
-    # Vendored ACS policy-engine crate deps (all real crates.io crates)
+    # Dependencies used by the standalone ACS crates and AGT integrations.
     "url", "ureq", "jsonschema", "criterion", "tokio", "rmcp",
     "async-openai", "rig-core", "napi", "napi-derive", "napi-build",
     "pyo3", "pyo3-build-config",

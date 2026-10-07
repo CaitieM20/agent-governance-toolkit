@@ -31,7 +31,6 @@ body:
         - agent-governance-toolkit-integrations
         - agent-governance-toolkit-protocols
         - agentmesh-integrations
-        - policy-engine
         - schemas
         - Documentation
         - Other

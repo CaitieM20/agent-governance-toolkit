@@ -61,7 +61,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     bash scripts/ci/install_pinned_rust.sh \
     && . "$HOME/.cargo/env" \
     && python -m pip install maturin==1.8.7 \
-    && python -m pip install --no-build-isolation ./policy-engine/sdk/python \
+    && python -m pip install agent-control-specification==0.4.0b0 \
     && python -c "import agent_control_specification; print('agent_control_specification OK')"
 
 # Stage 3: Python editable installs. A BuildKit cache mount on the pip

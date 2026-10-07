@@ -245,7 +245,7 @@ Todas las capas son opcionales. Empieza con `govern()` y añade capas a medida q
 | Paquete | Descripción |
 |---------|-------------|
 | [**Agent OS**](https://github.com/microsoft/agent-governance-toolkit/tree/main/agent-governance-python/agent-os) | Motor de políticas, ciclo de vida del agente, puerta de gobernanza |
-| [**Agent Control Specification**](https://github.com/microsoft/agent-governance-toolkit/tree/main/policy-engine) ([README](https://github.com/microsoft/agent-governance-toolkit/blob/main/policy-engine/README.md)) | Runtime de decisión de políticas sin estado, determinista y fail-closed (núcleo en Rust) que sustenta la capa de políticas de AGT |
+| [**Agent Control Specification**](https://github.com/responsibleai/agent-control-spec) | Runtime de decisión de políticas independiente usado por las integraciones de AGT |
 | [**Agent Mesh**](https://github.com/microsoft/agent-governance-toolkit/tree/main/agent-governance-python/agent-mesh) | Descubrimiento de agentes, enrutado y malla de confianza |
 | [**Agent Runtime**](https://github.com/microsoft/agent-governance-toolkit/tree/main/agent-governance-python/agent-runtime) | Sandboxing de ejecución con cuatro anillos de privilegio |
 | [**Agent SRE**](https://github.com/microsoft/agent-governance-toolkit/tree/main/agent-governance-python/agent-sre) | Interruptor de emergencia (kill switch), monitorización de SLO, pruebas de caos |
@@ -358,7 +358,7 @@ Cada componente principal cuenta con una especificación formal según RFC 2119 
 | Especificación | Alcance | Pruebas |
 |---|---|---|
 | [Agent OS Policy Engine](../specs/AGENT-OS-POLICY-ENGINE-1.0.md) | Integración nativa con el runtime y semántica fail-closed | — |
-| [Agent Control Specification](https://github.com/microsoft/agent-governance-toolkit/blob/main/policy-engine/spec/SPECIFICATION.md) | Runtime de políticas sin estado en puntos de intervención, veredictos, transformación, fail-closed | — |
+| [Agent Control Specification](https://github.com/responsibleai/agent-control-spec/blob/main/spec/SPECIFICATION.md) | Runtime de políticas sin estado en puntos de intervención, veredictos, transformación, fail-closed | — |
 | [AgentMesh Identity and Trust](../specs/AGENTMESH-IDENTITY-TRUST-1.0.md) | Credenciales, puntuación de confianza, cadenas de delegación | 135 |
 | [Agent Hypervisor Execution Control](../specs/AGENT-HYPERVISOR-EXECUTION-CONTROL-1.0.md) | Anillos de privilegio, orquestación de sagas, interruptor de emergencia | 80 |
 | [AgentMesh Trust and Coordination](../specs/AGENTMESH-TRUST-COORDINATION-1.0.md) | Negociación de confianza entre pares, política a nivel de malla | 62 |

@@ -28,13 +28,9 @@ PII_PATTERNS: tuple[re.Pattern[str], ...] = (
     # gateway-DoS on the MCP path; issue #3532 tracks this adapter-side copy.
     # Lookaround anchors rather than ``\b`` so an SSN glued to ``_``
     # (``employee_123-45-6789``) is still detected.
-    # NOT yet in step with the two Rego copies, which still carry the loose
-    # form: policy-engine/policy/lib/patterns.rego and agt-policies
-    # .../cli/_stock_rego/patterns.rego. The first declares that it tracks
-    # this constant and is reachable as a hard block through
-    # patterns.deny_if_pattern (agt_default.rego), so the same over-block
-    # survives on the OPA path; the wheel-shipped copy carries the pattern
-    # with no such note. They cannot take this pattern verbatim: RE2
+    # NOT yet in step with the wheel-shipped Rego copy in
+    # agt-policies/.../cli/_stock_rego/patterns.rego. It cannot take this
+    # pattern verbatim: RE2
     # has no lookaround support, so an equivalent has to anchor with
     # ``(^|[^A-Za-z0-9])`` / ``([^A-Za-z0-9]|$)``, which consumes a character
     # and shifts the span offset that deny_if_pattern reports.

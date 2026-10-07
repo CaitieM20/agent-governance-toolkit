@@ -2,12 +2,7 @@
 #
 # Extends the upstream gitleaks default ruleset and adds path-based allowlists
 # for test fixtures and credential-redaction code that intentionally contain
-# fake secrets, plus a narrowly scoped allowlist for the vendored Agent Control
-# Specification (ACS) subtree under policy-engine/, whose example apps and SDK
-# test fixtures intentionally embed deterministic, non-functional placeholder
-# credentials (e.g. "ghp_secret123", "finalSecret42") to exercise
-# secret-redaction and tool-gating behavior. These are not real secrets and
-# never authenticate against any service.
+# fake secrets.
 #
 # Prefer path-based rules here over .gitleaksignore fingerprints, which
 # break on squash merges (new commit SHA = new fingerprint needed).
@@ -17,13 +12,8 @@ title = "AGT gitleaks config"
 useDefault = true
 
 [allowlist]
-  description = "Allowlist for test fixtures, redaction patterns, and vendored ACS placeholder tokens"
+  description = "Allowlist for test fixtures and redaction patterns"
   paths = [
-    # Vendored ACS example apps and SDK/test fixtures use deliberately fake placeholder tokens
-    '''policy-engine/examples/.*''',
-    '''policy-engine/sdk/node/test/.*''',
-    '''policy-engine/.*/(test|tests|fixtures)/.*''',
-
     # Credential redaction test fixtures (fake keys used to test redaction)
     '''agent-governance-python/agent-discovery/tests/test_process_redaction\.py''',
     '''agent-governance-python/agent-os/tests/test_credential_redactor\.py''',
@@ -48,12 +38,10 @@ useDefault = true
     '''tests/e2e_python/.*''',
   ]
   regexes = [
-    '''^ghp_secret123$''',
-    '''^finalSecret42$''',
-
     # Public AWS KMS key-spec enum flagged by the generic key detector.
     '''^ECC_NIST_EDWARDS25519$''',
 
-    # Canary-token example in the .NET SDK tutorial (docs/tutorials/19-dotnet-sdk.md)
+    # Canary-token example in the .NET SDK tutorial.
     '''^SECRET-MARKER-xyz789$''',
+
   ]

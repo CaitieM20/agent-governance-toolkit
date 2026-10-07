@@ -56,7 +56,7 @@ def test_missing_pyatr_raises_clear_error(monkeypatch) -> None:
 def test_acs_runtime_end_to_end() -> None:
     pytest.importorskip(
         "agent_control_specification",
-        reason="ACS Python SDK not installed (pip install -e policy-engine/sdk/python)",
+        reason="ACS Python SDK not installed (pip install -r requirements.txt)",
     )
     from atr_adapter import make_control
 

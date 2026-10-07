@@ -7,7 +7,7 @@ use crate::skill_audit::{
     build_skill_audit_metadata, SkillAuditMetadata, TrustedSkillMetadataSource,
 };
 use agent_control_specification::{
-    AgentControl, Decision, EnforcementMode, InterceptionPoint, Manifest, RuntimeError,
+    AgentControl, Decision, EnforcementMode, InterventionPoint, Manifest, RuntimeError,
 };
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -383,7 +383,7 @@ impl<H: GovernanceHook> FrameworkGovernanceAdapter<H> {
         )];
         let (intervention_point, snapshot) = match tool_name {
             Some(tool) => (
-                InterceptionPoint::PreToolCall,
+                InterventionPoint::PreToolCall,
                 serde_json::json!({
                     "envelope": {
                         "agent": {"id": request.actor},
@@ -404,7 +404,7 @@ impl<H: GovernanceHook> FrameworkGovernanceAdapter<H> {
                 }),
             ),
             None => (
-                InterceptionPoint::Input,
+                InterventionPoint::Input,
                 serde_json::json!({
                     "envelope": {
                         "agent": {"id": request.actor},
@@ -430,11 +430,7 @@ impl<H: GovernanceHook> FrameworkGovernanceAdapter<H> {
             snapshot,
             EnforcementMode::Enforce,
         );
-        // agent-hooks has no `escalate` decision. An escalation is a
-        // liftable deny: `deny` carrying an `approval` block that the
-        // host resolves. A deny without one is final.
-        let requires_human_approval =
-            evaluation.verdict.decision == Decision::Deny && evaluation.verdict.approval.is_some();
+        let requires_human_approval = evaluation.verdict.decision == Decision::Escalate;
         if !evaluation.verdict.decision.permits() {
             let reason = evaluation
                 .verdict
@@ -1487,7 +1483,7 @@ mod tests {
             });
             if let Some(value) = self.transform {
                 output["transform"] = serde_json::json!({
-                    "path": "$target",
+                    "path": "$policy_target",
                     "value": value,
                 });
             }
@@ -1498,7 +1494,7 @@ mod tests {
     fn control(decision: &'static str, reason: Option<&'static str>) -> AgentControl {
         let manifest = Manifest::from_yaml_str(
             r#"
-agent_control_specification_version: 0.4.0-alpha.1
+agent_control_specification_version: 0.3.1-beta
 policies:
   integration:
     type: custom
@@ -1534,7 +1530,7 @@ tools:
     fn capturing_control(policy: CapturingPolicy) -> AgentControl {
         let manifest = Manifest::from_yaml_str(
             r#"
-agent_control_specification_version: 0.4.0-alpha.1
+agent_control_specification_version: 0.3.1-beta
 policies:
   integration:
     type: custom
@@ -1557,7 +1553,7 @@ tools:
     fn transform_control(value: &'static str) -> AgentControl {
         let manifest = Manifest::from_yaml_str(
             r#"
-agent_control_specification_version: 0.4.0-alpha.1
+agent_control_specification_version: 0.3.1-beta
 policies:
   integration:
     type: custom

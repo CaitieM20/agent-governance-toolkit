@@ -1,5 +1,5 @@
-# The ACS Python SDK is installed from this repo (builds the native core):
-#   pip install -e policy-engine/sdk/python
+# ACS SDK release, maintained at https://github.com/responsibleai/agent-control-spec
+agent-control-specification==0.4.0b0
 # Runtime detection engine (optional, pre-1.0):
 pyatr>=0.2.6
 # Used by atr_adapter to read manifest adapter_config (also a transitive ACS dep):

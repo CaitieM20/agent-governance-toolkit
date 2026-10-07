@@ -34,10 +34,10 @@ def _load_generator():
 gen = _load_generator()
 
 
-def test_build_outputs_includes_policy_engine_workflow():
+def test_build_outputs_excludes_removed_policy_engine_workflow():
     outputs = gen.build_outputs()
     names = {path.name for path in outputs}
-    assert "policy-engine-ci.yml" in names
+    assert "policy-engine-ci.yml" not in names
 
 
 def test_generation_is_deterministic():
@@ -64,29 +64,6 @@ def test_generated_opa_downloads_verify_checksum():
             assert "sha256sum -c -" in content
             assert gen.OPA_LINUX_AMD64_SHA256 in content
             assert "--retry 5 --retry-all-errors --retry-delay 5 --connect-timeout 20" in content
-
-
-def test_policy_engine_python_job_uses_pinned_tooling():
-    content = gen.build_outputs()[REPO_ROOT / ".github" / "workflows" / "policy-engine-ci.yml"]
-    assert "python -m pip install --upgrade pip==24.3.1" in content
-    assert "pip install maturin==1.8.7" in content
-    assert "pip install build==1.2.1" in content
-    assert "pip install setuptools==80.9.0" in content
-    assert "pytest==9.0.3" in content
-    assert "pip install ./sdk/python ./generator pytest" not in content
-
-
-def test_policy_engine_workflow_packages_acs_artifacts():
-    content = gen.build_outputs()[REPO_ROOT / ".github" / "workflows" / "policy-engine-ci.yml"]
-    assert "cargo package -p agent_control_specification_core --allow-dirty" in content
-    assert "cargo package -p agent_control_specification --allow-dirty" not in content
-    assert "bash ../scripts/ci/build_acs_python_wheel.sh .." in content
-    assert "python -m build --no-isolation ./generator" in content
-    assert "npm pack --pack-destination" in content
-    assert "node scripts/package-native.mjs --package agent-control-specification-linux-x64-gnu" in content
-    assert "agent-control-specification-linux-x64-gnu-0.3.1-beta.0.tgz" in content
-    assert "dotnet build AgentControlSpecification.sln --configuration Release" in content
-    assert "AgentControlSpecificationAllowIncompleteNativePack=true" in content
 
 
 def test_committed_yaml_matches_manifest():

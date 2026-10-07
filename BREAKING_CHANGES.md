@@ -53,7 +53,7 @@ Alternatively, build the Python extension with the `bundled-dispatchers`
 Cargo feature to opt into the bundled dispatcher and its access to host
 environment credentials. This is a build-time feature, not a Python package extra.
 
-See [the Python SDK dispatcher guidance](policy-engine/sdk/python/README.md#annotator-dispatchers).
+See the [standalone ACS project](https://github.com/responsibleai/agent-control-spec) for current Python SDK guidance.
 
 ---
 
@@ -109,7 +109,7 @@ you logged or stored numeric specificity values, they will change.
 - manifests with a rego policy, or a policy binding, that declares `bundle_url`
 - manifests with an `llm` annotator, or an annotation binding, that declares
   `system_prompt_file` or `system_prompt_url`
-- tooling that validates manifests against `policy-engine/spec/schema/manifest.schema.json`
+- tooling that validates manifests against the [ACS manifest schema](https://github.com/responsibleai/agent-control-spec/blob/main/spec/schema/manifest.schema.json)
 
 **What changed**
 
@@ -134,7 +134,7 @@ properties, so schema-only validators reject them as well.
 | `system_prompt_url: {url: ..., sha256: ...}` | `system_prompt: <the fetched text>` |
 | `bundle_url: {url: ..., sha256: ...}` | `bundle: ./policy` shipped with the manifest, or a host policy dispatcher that fetches the bundle (for a URL sourced manifest a local `bundle` is rejected; supply the bundle in memory or via a dispatcher) |
 
-See `policy-engine/docs/acs-retarget.md`, "Removed manifest fields".
+See the [standalone ACS project](https://github.com/responsibleai/agent-control-spec) for current manifest-field guidance.
 
 ---
 
@@ -174,8 +174,9 @@ manifest are always disabled in `manifest_from_url`, in the SDK `from_url`
 methods, and in the C ABI `acs_builder_from_url`, all of which force the
 redirect budget to zero. The `max_url_redirects` (Python) and `maxRedirects`
 (Node) arguments, and the `Limits::max_manifest_url_redirects` field, now
-have no effect on URL sourcing and no longer need to be set. See
-`policy-engine/docs/acs-retarget.md`.
+have no effect on URL sourcing and no longer need to be set. See the
+[standalone ACS project](https://github.com/responsibleai/agent-control-spec)
+for current URL sourcing guidance.
 
 ---
 
@@ -209,8 +210,9 @@ The engine also stopped mutating anything. Applying a transform, honouring
 `evaluate_only`, resolving an approval, and deriving the identity trio are host
 obligations now, discharged by `HostEvaluation`.
 
-`policy-engine/core` retains compatibility aliases for one release cycle.
-These retain names, not the old signatures or behavior.
+The retired in-repository core kept compatibility aliases for one release
+cycle; current ACS APIs and compatibility guidance are maintained by the
+[standalone ACS project](https://github.com/responsibleai/agent-control-spec).
 
 **How to update**
 
@@ -236,7 +238,7 @@ the old strings must update:
 | `runtime_error:effect_invalid`, `runtime_error:effect_target_forbidden` | gone with the effects plane. The engine keeps `runtime_error:transform_invalid` and `runtime_error:transform_target_forbidden`; a transform the host rejects while applying it reports `host_error:transform_invalid` or `host_error:transform_target_forbidden` |
 | `runtime_error:adapter_unsupported`, `runtime_error:streaming_unsupported` | `host_error:adapter_unsupported`, `host_error:streaming_unsupported` |
 
-`policy-engine/spec/reserved-reasons.json` is the registry.
+[The standalone ACS project](https://github.com/responsibleai/agent-control-spec/blob/main/spec/reserved-reasons.json) maintains the reserved-reason registry.
 
 Rust `use` paths inside `agent_control_specification_core` moved. The root
 re-exports still resolve; module-qualified imports must change:
@@ -255,8 +257,8 @@ Python consumers need `agent-control-specification>=0.4.0b0,<0.5.0`.
 The .NET SDK and adapters move together to 0.4.0-beta.0, and their native
 library is now `agent_control_specification`, without the `_core` suffix.
 
-`policy-engine/docs/acs-retarget.md` carries the full symbol mapping and the
-list of gaps filed upstream.
+The [standalone ACS project](https://github.com/responsibleai/agent-control-spec)
+maintains current implementation and migration guidance.
 
 ---
 

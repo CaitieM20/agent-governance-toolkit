@@ -7,10 +7,6 @@ on:
     paths:
       - "agent-governance-python/agent-governance-toolkit-core/**"
       - "agent-governance-python/agent-os/**"
-      - "policy-engine/sdk/python/**"
-      - "policy-engine/core/**"
-      - "policy-engine/Cargo.toml"
-      - "policy-engine/Cargo.lock"
       - "tests/e2e_python/**"
       - ".github/actions/**"
       - ".github/workflows/**"
@@ -23,10 +19,6 @@ on:
     paths:
       - "agent-governance-python/agent-governance-toolkit-core/**"
       - "agent-governance-python/agent-os/**"
-      - "policy-engine/sdk/python/**"
-      - "policy-engine/core/**"
-      - "policy-engine/Cargo.toml"
-      - "policy-engine/Cargo.lock"
       - "tests/e2e_python/**"
       - ".github/actions/**"
       - ".github/workflows/**"
@@ -68,13 +60,6 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      - name: Install Rust toolchain
-        # The ACS Python SDK (agent-control-specification) is a PyO3
-        # extension over the Rust core; building it from the in-tree
-        # source at policy-engine/sdk/python needs cargo + a C toolchain
-        # (present on ubuntu-latest by default).
-        uses: dtolnay/rust-toolchain@29eef336d9b2848a0b548edc03f92a220660cdb8 # stable
-
       - name: Install Python E2E dependencies
         run: |
           set -euo pipefail
@@ -82,7 +67,6 @@ jobs:
           python -m pip install \
             -e agent-governance-python/agent-governance-toolkit-core \
             -e agent-governance-python/agt-policies \
-            ./policy-engine/sdk/python \
             pytest==9.0.3 \
             pytest-timeout==2.4.0
 

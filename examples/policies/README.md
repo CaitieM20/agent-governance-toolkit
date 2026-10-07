@@ -12,7 +12,7 @@ Each file in this directory is a self-contained policy configuration that demons
 
 ## Policy format
 
-All files here follow the schema defined in [`policy-engine/spec`](../../policy-engine/spec/). Refer to that spec for the full list of supported fields, matchers, and enforcement actions.
+Agent Control Specification manifests follow the schema maintained in the [standalone Agent Control Specification project](https://github.com/responsibleai/agent-control-spec). Refer to its [manifest schema](https://github.com/responsibleai/agent-control-spec/blob/main/spec/schema/manifest.schema.json) for the supported fields, matchers, and enforcement actions.
 
 ## Related
 

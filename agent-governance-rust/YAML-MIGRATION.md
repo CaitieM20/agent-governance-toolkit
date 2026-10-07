@@ -96,29 +96,18 @@ its existing allow behavior.
 ## Compiler and release gates
 
 `serde-saphyr` 1.2.0 requires Rust 1.89. The Rust workspace already uses that
-floor. AGT's policy-engine core, host SDK and their Rust consumers now declare
-1.89 as well. The lockfiles select age-compliant `granit-parser` 1.2.1 and
-`encoding_rs` 0.8.35.
+floor. AGT's Rust workspace declares 1.89 as well. The lockfiles select
+age-compliant `granit-parser` 1.2.1 and `encoding_rs` 0.8.35.
 
 The committed registry-only graph still contains
-`agentmesh → agent_control_specification → agent-control-spec 0.4.0-alpha.3
-→ serde_yaml → unsafe-libyaml`. The core shim also depends on that external
-engine. The companion ACS parser change in
-`https://github.com/responsibleai/agent-control-spec/pull/75` must be released
-before these paths can disappear.
+`agentmesh → agent_control_specification` through the published
+[Agent Control Specification project](https://github.com/responsibleai/agent-control-spec).
+The local ACS source and host SDK have been removed from AGT. Update the
+published dependency through its registry release and regenerate the Rust lock
+file with Cargo; do not add a path dependency back into this repository.
 
-Release the ACS companion first, wait for the repository's dependency-age
-requirement, update both AGT external ACS pins to that actual published
-version, and regenerate locks with Cargo. Then publish a newly versioned core
-shim, its host SDK and finally the Rust 5.0 packages in the existing coordinated
-release process. No unpublished registry version or permanent local override
-is introduced by this change.
-
-A validation-only local patch of the companion engine removes `serde_yaml`,
-`unsafe-libyaml`, `yaml_serde` and `libyaml-rs` from the standalone Rust
-workspace's default and all-features graphs. Agentmesh requests Regorus with
-`regex` only. The policy-engine workspace now forwards an optional `rego`
-feature from the core shim, so its all-features graph also enables upstream
-Regorus YAML. That path retains `yaml_serde` and `libyaml-rs` with the companion
-engine. No YAML builtin is disabled to remove a dependency, and this is not
-a claim that the entire Rust graph contains no unsafe code.
+The upstream parser migration and its validation-only patch are maintained in
+the standalone ACS project. AGT consumes its released crate and does not carry
+or patch the ACS workspace. No YAML builtin is disabled by this repository to
+remove a dependency, and this is not a claim that the entire Rust graph
+contains no unsafe code.

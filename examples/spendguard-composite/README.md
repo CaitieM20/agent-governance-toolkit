@@ -1,3 +1,3 @@
 # SpendGuard composition
 
-The old local policy-composition demo was removed. Native budget enforcement uses ACS manifests and `policy-engine/policy/lib/budgets.rego`.
+The old local policy-composition demo was removed. Native budget enforcement uses ACS manifests from the [standalone Agent Control Specification project](https://github.com/responsibleai/agent-control-spec).

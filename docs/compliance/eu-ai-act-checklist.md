@@ -151,7 +151,7 @@ The toolkit governs agent runtime behavior (policy enforcement, trust scoring, e
 | Component | Location | Mechanism |
 |-----------|----------|-----------|
 | Compliance reports | `agent-governance-python/agent-mesh/src/agentmesh/governance/compliance.py:121-168` | `ComplianceReport` model with framework, period, controls, scores, violations |
-| Policy documents | `policy-engine/sdk/python/agent_control_specification/validation.py` | Serializable YAML/JSON ACS manifest with version, name, and intervention points |
+| Policy documents | [Standalone ACS project](https://github.com/responsibleai/agent-control-spec) | Serializable YAML/JSON ACS manifest with version, name, and intervention points |
 | Compliance engine | `agent-governance-python/agent-os/modules/control-plane/src/agent_control_plane/compliance.py:306-341` | Framework-scoped reports with requirement counts and pass rates |
 | Annex IV exporter | `agent-governance-python/agent-mesh/src/agentmesh/governance/annex_iv.py:35-514` | `TechnicalDocumentationExporter` assembles five structured sections from compliance reports, policies, audit entries, and SLO/SLI data; emits Markdown or JSON and marks deployer-required content |
 | Evidence pipeline | `agent-governance-python/agent-mesh/src/agentmesh/governance/evidence_pipeline.py:56-358` | Collects policy YAML, audit JSONL, compliance report JSON, and SLO/SLI JSON; emits an Annex IV Markdown draft, evidence-source manifest, and gap warnings |
@@ -211,7 +211,7 @@ The toolkit governs agent runtime behavior (policy enforcement, trust scoring, e
 |-----------|----------|-----------|
 | EUAI-ART13 control | `agent-governance-python/agent-mesh/src/agentmesh/governance/compliance.py:270-282` | Defines explainability, documentation, and user notification requirements |
 | Transparency check | `agent-governance-python/agent-os/modules/control-plane/src/agent_control_plane/compliance.py:390-401` | Validates `provides_transparency_info` boolean in context |
-| Decision explanations | `policy-engine/sdk/python/agent_control_specification/validation.py` | `PolicyRule.message` field for human-readable explanation of each governance decision |
+| Decision explanations | [Standalone ACS project](https://github.com/responsibleai/agent-control-spec) | `PolicyRule.message` field for human-readable explanation of each governance decision |
 | CloudEvents export | `agent-governance-python/agent-mesh/src/agentmesh/governance/audit.py:90-128` | Serializes decisions to CloudEvents v1.0 with action, outcome, policy_decision, matched_rule |
 | OpenTelemetry tracing | `agent-governance-python/agent-mesh/src/agentmesh/observability/otel_governance.py:31` | `GovernanceTracer` for governance decision instrumentation |
 
@@ -322,7 +322,7 @@ The toolkit governs agent runtime behavior (policy enforcement, trust scoring, e
 
 | Component | Location | Mechanism |
 |-----------|----------|-----------|
-| Retention days schema | `policy-engine/spec/schema/manifest.schema.json:215-218` | `retention_days` field with default 90, minimum 1 |
+| Retention days schema | [ACS manifest schema](https://github.com/responsibleai/agent-control-spec/blob/main/spec/schema/manifest.schema.json) | `retention_days` field with default 90, minimum 1 |
 | Human oversight | `agent-governance-python/agent-os/src/agent_os/integrations/escalation.py:120-583` | Full escalation system with approval backends |
 | Kill switch | `agent-governance-python/agent-hypervisor/src/hypervisor/security/kill_switch.py:64-136` | Emergency termination (see Art. 14 caveats) |
 | SRE monitoring | `agent-governance-python/agent-sre/src/agent_sre/slo/indicators.py` | SLI/SLO framework for operational monitoring |

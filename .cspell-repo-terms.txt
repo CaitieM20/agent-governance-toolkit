@@ -17,7 +17,6 @@ struction
 # --- Python test suite code identifiers and scenario names ---
 # --- TRACE / identity-chain / advisory terms ---
 # --- Test code terms ---
-# --- Vendored ACS (policy-engine) + integration terms (responsibleai MIT subtree) ---
 # --- West/North Africa regulatory policy terms ---
 # --- cloud-board cryptography 50.0.0 audit terms (flagged by cspell) ---
 # Arabic: رقم قومي — "national number" in the Egyptian National ID detection regex

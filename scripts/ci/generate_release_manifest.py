@@ -28,9 +28,7 @@ PYPI_PACKAGES = [
     ("agent-marketplace", "agent-governance-python/agent-marketplace", "github-actions"),
     ("agent-rag-governance", "agent-governance-python/agent-rag-governance", "github-actions"),
     ("agt-sandbox", "agent-governance-python/agent-sandbox", "github-actions"),
-    ("agent-control-specification", "policy-engine/sdk/python", "github-actions"),
     ("agt-policies", "agent-governance-python/agt-policies", "github-actions"),
-    ("acs-generator", "policy-engine/generator", "github-actions"),
 ]
 
 NPM_PACKAGES = [
@@ -45,9 +43,6 @@ NPM_PACKAGES = [
     ("agentmesh-sdk", "agent-governance-typescript", "github-actions"),
     ("agent-os-copilot-extension", "agent-governance-python/agent-os/extensions/copilot", "github-actions"),
     ("agentos-mcp-server", "agent-governance-python/agent-os/extensions/mcp-server", "github-actions"),
-    ("agent-control-specification", "policy-engine/sdk/node", "policy-engine-ci-pack-only"),
-    ("agent-control-specification-native-packages", "policy-engine/sdk/node/npm", "policy-engine-ci-pack-only"),
-    ("agent-control-specification-opa-packages", "policy-engine/sdk/node/npm", "policy-engine-ci-pack-only"),
 ]
 
 NUGET_PACKAGES = [
@@ -62,26 +57,11 @@ NUGET_PACKAGES = [
         "agent-governance-dotnet/src/AgentGovernance.Extensions.Microsoft.Agents",
         "github-actions",
     ),
-    ("AgentControlSpecification", "policy-engine/sdk/dotnet/src/AgentControlSpecification", "policy-engine-ci-pack-only"),
-    ("AgentControlSpecification.AI", "policy-engine/sdk/dotnet/src/AgentControlSpecification.AI", "policy-engine-ci-pack-only"),
-    (
-        "AgentControlSpecification.AgentFramework",
-        "policy-engine/sdk/dotnet/src/AgentControlSpecification.AgentFramework",
-        "policy-engine-ci-pack-only",
-    ),
-    ("AgentControlSpecification.AutoGen", "policy-engine/sdk/dotnet/src/AgentControlSpecification.AutoGen", "policy-engine-ci-pack-only"),
-    (
-        "AgentControlSpecification.SemanticKernel",
-        "policy-engine/sdk/dotnet/src/AgentControlSpecification.SemanticKernel",
-        "policy-engine-ci-pack-only",
-    ),
 ]
 
 RUST_CRATES = [
     ("agentmesh", "agent-governance-rust/agentmesh", "manual-publish-needed"),
     ("agentmesh-mcp", "agent-governance-rust/agentmesh-mcp", "manual-publish-needed"),
-    ("agent_control_specification_core", "policy-engine/core", "policy-engine-ci-pack-only"),
-    ("agent_control_specification", "policy-engine/sdk/rust", "manual-publish-needed"),
 ]
 
 GO_MODULES = [
@@ -140,7 +120,6 @@ def build_manifest(args: argparse.Namespace) -> dict[str, Any]:
         "artifacts": artifacts,
         "automation_legend": {
             "github-actions": "Built and published by .github/workflows/publish.yml or publish-containers.yml.",
-            "policy-engine-ci-pack-only": "Packaged by policy-engine CI; canonical publish workflow still needs explicit registry release wiring.",
             "manual-publish-needed": "Build/package exists, but canonical registry publication is not automated in publish.yml.",
             "tag-publish-needed": "Published by Go module tag/proxy; release workflow must create or validate tags.",
         },

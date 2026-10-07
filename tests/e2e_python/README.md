@@ -66,7 +66,7 @@ python3 -m venv .venv
 .venv/bin/python -m pip install --upgrade pip
 .venv/bin/python -m pip install \
   -e agent-governance-python/agent-governance-toolkit-core \
-  ./policy-engine/sdk/python \
+  agent-control-specification==0.4.0b0 \
   pytest pytest-timeout
 AGT_E2E_MODEL=llama3.1 \
 AGT_E2E_MODEL_ATTEMPTS=3 \

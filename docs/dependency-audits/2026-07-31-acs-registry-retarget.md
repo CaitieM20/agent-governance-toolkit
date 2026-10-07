@@ -23,7 +23,7 @@ Upstream default features are disabled explicitly. AGT's compatibility host
 constructs the OPA dispatcher directly, including when another consumer enables
 in-process Rego. The public supported-version list and runtime getters replace
 their former copies. See
-[`acs-retarget.md`](../../policy-engine/docs/acs-retarget.md) for retained
+[the standalone ACS project](https://github.com/responsibleai/agent-control-spec) for retained
 compatibility surfaces, current limitations and release sequencing.
 
 The original audit below is historical. It predates the completed .NET retarget
@@ -95,7 +95,7 @@ bundled annotator dispatcher, which resolves `api_key_env` against the host
 environment, behind an off-by-default `bundled-dispatchers` feature.
 
 That gate is narrower than it sounds, and the limit is documented in
-`policy-engine/docs/acs-retarget.md`. A manifest supplies the Rego query, which
+the standalone ACS project. A manifest supplies the Rego query, which
 reaches `opa eval` as an arbitrary expression, and Rego reads the inherited
 environment through `opa.runtime().env`. So a manifest is trusted input to the
 policy plane. That predates this change, since the previous embedded engine
@@ -125,4 +125,4 @@ do warn at the call site.
 Phase 1 covers Rust, Python, and Node. The .NET SDK is not retargeted: it is
 still five-verdict and reaches the engine through the C ABI this change
 removes, so its CI job fails on this branch. That and four other open gaps are
-listed in `policy-engine/docs/acs-retarget.md` rather than left implicit.
+listed in the standalone ACS project rather than left implicit.

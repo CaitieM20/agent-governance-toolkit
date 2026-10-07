@@ -31,9 +31,11 @@ updating this file.
 | `agent-governance-toolkit-integrations` | framework-specific `agentmesh-*` / `*-agentmesh` packages | `agent-governance-python/agent-governance-toolkit-integrations` | Publish canonical integrations package; old names become dependency-only stubs or documented extras. |
 | `agent-governance-toolkit-cli` | `agent-sre`, `agent-sandbox`, MCP trust/proxy packages | `agent-governance-python/agent-governance-toolkit-cli` | Publish canonical CLI package; old names become stubs where published. |
 | `agent-governance-toolkit-protocols` | `agent-mcp-governance`, protocol-specific packages | `agent-governance-python/agent-governance-toolkit-protocols` | Publish canonical protocol package; old names become stubs where published. |
-| `agent-control-specification` | same | `policy-engine/sdk/python` | Keep canonical ACS Python SDK. |
 | `agt-policies` | same | `agent-governance-python/agt-policies` | Keep canonical ACS/AGT policy package. |
-| `acs-generator` | same | `policy-engine/generator` | Keep canonical generator package. |
+
+Agent Control Specification source, schemas, and SDK releases are owned by the
+[standalone ACS project](https://github.com/responsibleai/agent-control-spec).
+AGT consumes its published packages and does not publish ACS artifacts.
 
 ## npm
 
@@ -44,8 +46,6 @@ updating this file.
 | `@aaif/agent-governance-claude-code` | `@microsoft/agent-governance-claude-code` | `agent-governance-claude-code` | Vendor integration package; retain Microsoft package only as compatibility wrapper. |
 | `@aaif/agent-governance-opencode` | `@microsoft/agent-governance-opencode` | `agent-governance-opencode` | Vendor integration package; retain Microsoft package only as compatibility wrapper. |
 | `@aaif/agent-governance-antigravity-cli` | `@microsoft/agent-governance-antigravity-cli` | `agent-governance-antigravity-cli` | Vendor integration package; retain Microsoft package only as compatibility wrapper. |
-| `agent-control-specification` | same | `policy-engine/sdk/node` | Keep canonical ACS Node SDK unless AAIF chooses scoped ACS packages. |
-| `agent-control-specification-*` | same | `policy-engine/sdk/node/npm/*` | Keep platform package names unless AAIF chooses scoped ACS packages. |
 
 ## NuGet
 
@@ -54,7 +54,6 @@ updating this file.
 | `AgentGovernance` | `Microsoft.AgentGovernance` | `agent-governance-dotnet/src/AgentGovernance` | Publish neutral package; keep Microsoft ID only as compatibility package if needed. |
 | `AgentGovernance.Extensions.ModelContextProtocol` | `Microsoft.AgentGovernance.Extensions.ModelContextProtocol` | `agent-governance-dotnet/src/AgentGovernance.Extensions.ModelContextProtocol` | Publish neutral package; keep Microsoft ID only as compatibility package if needed. |
 | `AgentGovernance.Extensions.Microsoft.Agents` | `Microsoft.AgentGovernance.Extensions.Microsoft.Agents` | `agent-governance-dotnet/src/AgentGovernance.Extensions.Microsoft.Agents` | Vendor-specific integration; publish only if AAIF accepts the package identity. |
-| `AgentControlSpecification*` | same | `policy-engine/sdk/dotnet/src/*` | Keep canonical ACS .NET packages. |
 
 ## Rust / crates.io
 
@@ -62,8 +61,9 @@ updating this file.
 |---|---|---|
 | `agentmesh` | `agent-governance-rust/agentmesh` | Transfer crate ownership to foundation release managers. |
 | `agentmesh-mcp` | `agent-governance-rust/agentmesh-mcp` | Transfer crate ownership to foundation release managers. |
-| `agent_control_specification_core` | `policy-engine/core` | Transfer crate ownership to foundation release managers. |
-| `agent_control_specification` | `policy-engine/sdk/rust` | Transfer crate ownership to foundation release managers. |
+
+The ACS Rust crates are maintained and released by the
+[standalone ACS project](https://github.com/responsibleai/agent-control-spec).
 
 ## Go
 

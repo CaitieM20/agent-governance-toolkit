@@ -39,18 +39,9 @@ SKIP_DIRS = {
 # entry below.
 #
 # Rationale:
-#   - policy-engine/  : the vendored Agent Control Specification (ACS) runtime
-#                       and its language SDKs ship on their own pre-1.0 release
-#                       cadence (currently 0.3.x). They are published as the
-#                       `agent-control-specification` / `acs-generator`
-#                       distributions, not as part of the AGT toolkit release,
-#                       so they track a separate version line. (see PR #2855)
-#   - agent-governance-python/agt-policies : the "AGT 5.0 policy layer" over the
-#                       vendored ACS engine. It is deliberately on the 5.x line
-#                       to signal the policy-layer contract version and must not
-#                       be dragged back to the toolkit version.
+#   - agent-governance-python/agt-policies : the AGT migration package is
+#                       deliberately versioned independently from the toolkit.
 EXEMPT_PREFIXES = (
-    "policy-engine/",
     "agent-governance-python/agt-policies/",
 )
 

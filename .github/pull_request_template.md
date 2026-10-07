@@ -43,7 +43,6 @@
 - [ ] agent-sandbox
 - [ ] agent-discovery
 - [ ] agt-policies
-- [ ] policy-engine
 
 **Platform & tooling:**
 - [ ] agent-hypervisor

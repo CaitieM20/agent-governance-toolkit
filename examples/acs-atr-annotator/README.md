@@ -35,9 +35,12 @@ acs-atr-annotator/
 
 ```bash
 python -m venv .venv && . .venv/bin/activate
-pip install -e policy-engine/sdk/python        # ACS Python SDK (builds the native core)
+pip install agent-control-specification==0.4.0b0
 pip install -r examples/acs-atr-annotator/requirements.txt
 ```
+
+The ACS runtime and SDK are maintained in the
+[standalone project](https://github.com/responsibleai/agent-control-spec).
 
 ## Run
 

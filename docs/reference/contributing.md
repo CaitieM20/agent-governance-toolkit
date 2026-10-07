@@ -134,10 +134,8 @@ cd agent-governance-toolkit
 # Install the core package from the local source to avoid dependency conflicts
 pip install --no-cache-dir --no-deps -e "agent-governance-python/agent-governance-toolkit-core"
 
-# Build the local ACS SDK required by the consolidated core package. The
-# required 0.4.0b0 release is not available from PyPI yet.
-pip install --no-cache-dir maturin==1.8.7
-pip install --no-cache-dir --no-build-isolation ./policy-engine/sdk/python
+# Install the ACS SDK from its standalone project release.
+pip install --no-cache-dir "agent-control-specification>=0.4.0b0,<0.5.0"
 
 pip install -e "agent-governance-python/agent-primitives[dev]"
 pip install -e "agent-governance-python/agent-mcp-governance[dev]"

@@ -224,7 +224,7 @@ change the ACS decision contract.
 
 | SDK | Install |
 |-----|---------|
-| [ACS host for Python](packages/agent-control-specification.md#how-python-hosts-call-acs) | `pip install agent-control-specification` |
+| [Standalone Agent Control Specification](https://github.com/responsibleai/agent-control-spec) | `pip install agent-control-specification` |
 | [Python](packages/index.md) | `pip install agent-governance-toolkit[full]` |
 | [TypeScript](tutorials/20-typescript-sdk.md) | `npm install @microsoft/agent-governance-sdk` |
 | [.NET](packages/dotnet-sdk.md) | `dotnet add package Microsoft.AgentGovernance` |

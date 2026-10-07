@@ -142,14 +142,7 @@ def _find_stock_rego_root() -> Path:
     packaged = Path(__file__).with_name("_stock_rego")
     if packaged.is_dir():
         return packaged
-    here = Path(__file__).resolve()
-    for parent in here.parents:
-        candidate = parent / "policy-engine" / "policy" / "lib"
-        if candidate.is_dir():
-            return candidate
-    raise FileNotFoundError(
-        "could not locate policy-engine/policy/lib stock Rego root"
-    )
+    raise FileNotFoundError("the packaged stock Rego library is missing")
 
 
 def _pattern_to_regex(pattern: str | tuple[str, str]) -> str:

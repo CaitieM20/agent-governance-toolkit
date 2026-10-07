@@ -70,7 +70,8 @@ modules live in the consolidated core distribution. The `agentmesh` quick-start
 import remains the current wrapper API. Importing `agent_os` emits a
 `DeprecationWarning` because the old `agent-os-kernel` distribution is deprecated.
 Use `agent-governance-toolkit-core` (or the `[full]` extra that includes it) as
-the replacement distribution. Policy-engine host code uses the ACS SDK;
+the replacement distribution. AGT policy integrations consume the ACS SDK
+published by the [standalone ACS project](https://github.com/responsibleai/agent-control-spec);
 `agt-policies` provides the one-way v4-to-v5 migration command. The pre-ACS
 `agent_os.policies` rule model is gone, and `BREAKING_CHANGES.md` lists its
 replacements.
@@ -236,7 +237,7 @@ Every layer is optional. Start with `govern()` and add layers as your risk profi
 | Package | Description |
 |---------|-------------|
 | [**Agent OS**](agent-governance-python/agent-os/) | Policy engine, agent lifecycle, governance gate |
-| [**Agent Control Specification**](policy-engine/) ([README](policy-engine/README.md)) | Stateless, deterministic, fail-closed policy decision runtime (Rust core) backing the AGT policy layer |
+| [**Agent Control Specification**](https://github.com/responsibleai/agent-control-spec) | Standalone, stateless policy decision runtime used by AGT integrations |
 | [**Agent Mesh**](agent-governance-python/agent-mesh/) | Agent discovery, routing, and trust mesh |
 | [**Agent Runtime**](agent-governance-python/agent-runtime/) | Execution sandboxing with four privilege rings |
 | [**Agent SRE**](agent-governance-python/agent-sre/) | Kill switch, SLO monitoring, chaos testing |
@@ -349,7 +350,7 @@ Every major component has a formal RFC 2119 specification with conformance tests
 | Specification | Scope | Tests |
 |---|---|---|
 | [Agent OS Policy Engine](docs/specs/AGENT-OS-POLICY-ENGINE-1.0.md) | Native runtime integration and fail-closed semantics | -- |
-| [Agent Control Specification](policy-engine/spec/SPECIFICATION.md) | Stateless intervention-point policy runtime, verdicts, transform, fail-closed | -- |
+| [Agent Control Specification](https://github.com/responsibleai/agent-control-spec/blob/main/spec/SPECIFICATION.md) | Stateless intervention-point policy runtime, verdicts, transform, fail-closed | -- |
 | [AgentMesh Identity and Trust](docs/specs/AGENTMESH-IDENTITY-TRUST-1.0.md) | Credentials, trust scoring, delegation chains | 135 |
 | [Agent Hypervisor Execution Control](docs/specs/AGENT-HYPERVISOR-EXECUTION-CONTROL-1.0.md) | Privilege rings, saga orchestration, kill switch | 80 |
 | [AgentMesh Trust and Coordination](docs/specs/AGENTMESH-TRUST-COORDINATION-1.0.md) | Peer trust negotiation, mesh-wide policy | 62 |

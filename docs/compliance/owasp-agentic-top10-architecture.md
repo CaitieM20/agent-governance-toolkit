@@ -82,8 +82,8 @@ execution. Manifests bind classifier, endpoint, or Rego policies and preserve
 the input and enforced identities for audit.
 
 **Evidence:**
-- `policy-engine/spec/SPECIFICATION.md` input intervention-point contract
-- `policy-engine/sdk/node/src/index.ts` `AgentControl.evaluateInterventionPoint`
+- [ACS specification](https://github.com/responsibleai/agent-control-spec/blob/main/spec/SPECIFICATION.md) input intervention-point contract
+- [Standalone ACS project](https://github.com/responsibleai/agent-control-spec) `AgentControl.evaluateInterventionPoint`
 - `agent-governance-python/agentmesh-integrations/copilot-governance/src/reviewer.ts` rule `no-prompt-injection-guards`
 
 **Coverage:** ✅ Full
@@ -100,8 +100,8 @@ mediate both pre-tool and post-tool intervention points. The static reviewer
 flags unguarded `.execute()` calls.
 
 **Evidence:**
-- `policy-engine/spec/schema/manifest.schema.json` tool catalog
-- `policy-engine/sdk/node/src/index.ts` `AgentControl.runTool`
+- [ACS manifest schema](https://github.com/responsibleai/agent-control-spec/blob/main/spec/schema/manifest.schema.json) tool catalog
+- [Standalone ACS project](https://github.com/responsibleai/agent-control-spec) `AgentControl.runTool`
 - `agent-governance-python/agentmesh-integrations/copilot-governance/src/reviewer.ts` rules `unguarded-tool-execution`, `no-tool-allowlist`
 
 **Coverage:** ✅ Full
@@ -117,7 +117,7 @@ content before execution. The runtime binds input and enforced identities so
 hosts can audit transforms and approval decisions.
 
 **Evidence:**
-- `policy-engine/spec/SPECIFICATION.md` identity and annotator contracts
+- [ACS specification](https://github.com/responsibleai/agent-control-spec/blob/main/spec/SPECIFICATION.md) identity and annotator contracts
 - `agent-governance-python/agent-os/src/agent_os/integrations/rbac.py`
 - `agent-governance-python/agent-mesh/src/agentmesh/trust/handshake.py`
 
