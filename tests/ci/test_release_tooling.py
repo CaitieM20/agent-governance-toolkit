@@ -355,6 +355,7 @@ def test_fuzz_builder_preserves_sanitizer_and_coverage_tooling() -> None:
     assert "ln -s /root/.cargo/bin/cargo /rust/bin/cargo" in dockerfile
     assert 'ENV PATH="${PATH}:/root/.cargo/bin"' in dockerfile
     build_script = (REPO_ROOT / ".clusterfuzzlite/build.sh").read_text(encoding="utf-8")
-    assert "CARGO_BUILD_TARGET=x86_64-unknown-linux-gnu" in build_script
+    assert "pip3 install ./agent-governance-python/agt-policies" in build_script
+    assert "policy-engine/sdk/python" not in build_script
     assert "unset RUSTFLAGS" not in build_script
     assert 'RUSTFLAGS=""' not in build_script
