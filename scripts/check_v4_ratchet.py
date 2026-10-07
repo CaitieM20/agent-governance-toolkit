@@ -261,7 +261,6 @@ def _in_allowed_root(rel_path: str) -> bool:
 
 def decide_scanner(path: Path) -> str | None:
     """Return the scanner name for a path, or None to skip it."""
-    rel = _rel(path)
     parts = path.relative_to(REPO_ROOT).parts
     if any(part in EXCLUDE_DIR_NAMES for part in parts):
         return None

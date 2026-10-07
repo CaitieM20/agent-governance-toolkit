@@ -83,7 +83,7 @@ jobs:
             {"name":"agent-marketplace","path":"agent-governance-python/agent-marketplace"},
             {"name":"agent-rag-governance","path":"agent-governance-python/agent-rag-governance"},
             {"name":"agt-sandbox","path":"agent-governance-python/agent-sandbox"},
-            {"name":"agt-policies","path":"agent-governance-python/agt-policies"},
+            {"name":"agt-policies","path":"agent-governance-python/agt-policies"}
           ]'
           # Compact the JSON
           ALL=$(echo "$ALL" | jq -c '.')

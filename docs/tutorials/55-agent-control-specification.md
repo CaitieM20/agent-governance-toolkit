@@ -9,6 +9,6 @@ owner: agt-maintainers
 The Agent Control Specification runtime and its SDK tutorials have moved to the
 [standalone project](https://github.com/responsibleai/agent-control-spec).
 
-Start with the upstream [quickstart](https://github.com/responsibleai/agent-control-spec/blob/main/QUICKSTART.md)
+Start with the upstream [quickstart](https://github.com/responsibleai/agent-control-spec/blob/main/README.md)
 or [normative specification](https://github.com/responsibleai/agent-control-spec/blob/main/spec/SPECIFICATION.md).
 For AGT-specific policy integration, continue to the [AGT policy engine tutorial](01-policy-engine.md).

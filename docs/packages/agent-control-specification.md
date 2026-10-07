@@ -11,7 +11,7 @@ integrations consume the published ACS packages; the runtime, SDKs, schemas,
 specification, and release process are maintained upstream.
 
 - [Agent Control Specification repository](https://github.com/responsibleai/agent-control-spec)
-- [Quickstart](https://github.com/responsibleai/agent-control-spec/blob/main/QUICKSTART.md)
+- [Quickstart](https://github.com/responsibleai/agent-control-spec/blob/main/README.md)
 - [Normative specification](https://github.com/responsibleai/agent-control-spec/blob/main/spec/SPECIFICATION.md)
 - [Manifest schema](https://github.com/responsibleai/agent-control-spec/blob/main/spec/schema/manifest.schema.json)
 
