@@ -71,68 +71,17 @@ def test_esrp_pipeline_is_restored_as_temporary_registry_publish_path() -> None:
     assert ".github/pipelines/release-tools" not in text
 
 
-def test_esrp_pipeline_builds_complete_acs_python_distribution() -> None:
-    text = ESRP_PIPELINE.read_text(encoding="utf-8")
-    # Check the platform / buildPlatform tokens independently so the test stays
-    # stable against harmless YAML reindentation of the matrix entries.
-    expected_matrix_entries = [
-        ("platform: linux-x86_64", "buildPlatform: linux-x86_64"),
-        ("platform: linux-aarch64", "buildPlatform: linux-aarch64-cross"),
-        ("platform: macos-x86_64", "buildPlatform: macos-x86_64"),
-        ("platform: macos-arm64", "buildPlatform: macos-arm64"),
-        ("platform: windows-x86_64", "buildPlatform: windows-x86_64"),
-    ]
-    for platform, build_platform in expected_matrix_entries:
-        assert platform in text
-        assert build_platform in text
-
-    assert (
-        "condition: and(succeeded(), ne('${{ pkg.name }}', 'agent-control-specification'))"
-        in text
+def test_release_workflows_do_not_build_or_publish_in_tree_acs_packages() -> None:
+    text = "\n".join(
+        path.read_text(encoding="utf-8") for path in (PUBLISH, ESRP_PIPELINE)
     )
-    assert "python scripts/ci/smoke_acs_python_wheel.py" in text
-    assert "python -m maturin build" in text
-    assert "bash scripts/ci/install_pinned_rust.sh" in text
-    assert "install_pinned_rust_windows.ps1" in text
-    assert "pwsh:" in text
-    assert "job: Build_PyPI_ACS_sdist" in text
-    assert "job: Aggregate_PyPI_ACS" in text
-    assert "python scripts/ci/verify_acs_python_dist.py" in text
-    assert "Build and smoke test a wheel from the ACS source distribution" in text
-    assert "CARGO_NET_OFFLINE=true python -m pip wheel" in text
-    assert "grep -Fq 'path = \"../../core\"'" in text
-    assert "artifact: 'pypi-agent-control-specification'" in text
-
-
-def test_esrp_native_assets_match_the_host_sdk_cdylib() -> None:
-    import yaml
-
-    pipeline = yaml.safe_load(ESRP_PIPELINE.read_text(encoding="utf-8"))
-    assets = next(
-        parameter["default"]
-        for parameter in pipeline["parameters"]
-        if parameter["name"] == "acsDotnetNativeAssets"
-    )
-    native_targets = REPO_ROOT / (
-        "policy-engine/sdk/dotnet/src/AgentControlSpecification/"
-        "AgentControlSpecification.NativeLibrary.targets"
-    )
-    xml = ET.parse(native_targets)
-    expected = {
-        node.attrib["Include"].removeprefix("$(MSBuildThisFileDirectory)runtimes/")
-        for node in xml.iter("_AcsRequiredPackageNativeAsset")
-    }
-    assert {f"{asset['rid']}/native/{asset['nativeLib']}" for asset in assets} == expected
-    cargo = tomllib.loads(
-        (REPO_ROOT / "policy-engine/sdk/rust/Cargo.toml").read_text(encoding="utf-8")
-    )
-    assert "cdylib" in cargo["lib"]["crate-type"]
-    native_jobs = ESRP_PIPELINE.read_text(encoding="utf-8").split(
-        "- job: Build_ACS_Native_", 1
-    )[1].split("- job: BuildAndPack_ACS", 1)[0]
-    assert f"-p {cargo['package']['name']} \\" in native_jobs
-    assert "--features opa,bundled-dispatchers" in native_jobs
-    assert "AllowIncompleteNativePack" not in native_jobs
+    for marker in (
+        "policy-engine/",
+        "agent-control-specification",
+        "agent_control_specification",
+        "acs-generator",
+    ):
+        assert marker not in text
 
 
 def test_python_manifest_producers_require_the_retargeted_sdk() -> None:
@@ -225,25 +174,12 @@ def test_python_ci_resolves_unpublished_policy_dependencies_locally() -> None:
     ) < integration_install.index('-e ".[dev]"')
 
 
-def test_esrp_pypi_publication_waits_for_policy_prerequisites() -> None:
-    import yaml
-
-    pipeline = yaml.safe_load(ESRP_PIPELINE.read_text(encoding="utf-8"))
-    stage = next(stage for stage in pipeline["stages"] if stage["stage"] == "Publish_PyPI")
-    job = next(iter(stage["jobs"][0].values()))[0]
-    prerequisites = next(iter(job["dependsOn"][0].values()))
-    conditions = "\n".join(next(iter(condition)) for condition in prerequisites)
-    assert "eq(prerequisite.name, 'agent-control-specification')" in conditions
-    assert "eq(pkg.name, 'agt-policies')" in conditions
-    assert "eq(pkg.name, 'acs-generator')" in conditions
-    assert "and(eq(prerequisite.name, 'agt-policies'), eq(pkg.name, 'agent-governance-toolkit-core'))" in conditions
-    assert all(
-        next(iter(condition.values())) == [
-            "Publish_PyPI_${{ replace(prerequisite.name, '-', '_') }}"
-        ]
-        for condition in prerequisites
-    )
-    assert "waitforreleasecompletion: true" in ESRP_PIPELINE.read_text(encoding="utf-8")
+def test_esrp_pypi_publication_does_not_wait_for_in_tree_acs_packages() -> None:
+    text = ESRP_PIPELINE.read_text(encoding="utf-8")
+    assert "agent-control-specification" not in text
+    assert "acs-generator" not in text
+    assert "agt-policies" in text
+    assert "waitforreleasecompletion: true" in text
 
 
 def test_github_publish_keeps_bulk_dry_runs_but_rejects_parallel_uploads(tmp_path: Path) -> None:
@@ -327,68 +263,17 @@ def test_publish_workflow_publishes_language_artifacts() -> None:
 def test_pypi_prepare_and_publish_conditions_match() -> None:
     text = PUBLISH.read_text(encoding="utf-8")
     condition = "if: github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false'"
-    python_jobs = [
-        text[text.index("publish-acs-python:") : text.index("build-python:")],
-        text[text.index("build-python:") : text.index("resolve-npm-matrix:")],
-    ]
-    for job in python_jobs:
-        prepare = job[job.index("- name: Prepare PyPI upload artifacts") :]
-        prepare = prepare[: prepare.index("- name: Upload build artifacts")]
-        publish = job[job.index("- name: Publish to PyPI") :]
-        publish = publish[: publish.index("uses: pypa/gh-action-pypi-publish")]
-        assert condition in prepare
-        assert condition in publish
+    job = text[text.index("build-python:") : text.index("resolve-npm-matrix:")]
+    prepare = job[job.index("- name: Prepare PyPI upload artifacts") :]
+    prepare = prepare[: prepare.index("- name: Upload build artifacts")]
+    publish = job[job.index("- name: Publish to PyPI") :]
+    publish = publish[: publish.index("uses: pypa/gh-action-pypi-publish")]
+    assert condition in prepare
+    assert condition in publish
     assert (
         "github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false'"
         in text
     )
-
-
-def test_acs_python_release_builds_complete_platform_matrix() -> None:
-    text = PUBLISH.read_text(encoding="utf-8")
-    expected_matrix_entries = [
-        "ubuntu-24.04, platform: linux-x86_64, target: x86_64-unknown-linux-gnu",
-        "ubuntu-24.04-arm, platform: linux-aarch64, target: aarch64-unknown-linux-gnu",
-        "macos-15-intel, platform: macos-x86_64, target: x86_64-apple-darwin",
-        "macos-15, platform: macos-arm64, target: aarch64-apple-darwin",
-        "windows-2022, platform: windows-x86_64, target: x86_64-pc-windows-msvc",
-    ]
-    for entry in expected_matrix_entries:
-        assert entry in text
-    assert 'wheel: "*macosx_10_12_x86_64.whl"' in text
-    assert 'wheel: "*macosx_11_0_arm64.whl"' in text
-
-    assert "build_any: ${{ steps.resolve.outputs.build_any }}" in text
-    assert "acs: ${{ steps.resolve.outputs.acs }}" in text
-    assert 'select(.name != "agent-control-specification")' in text
-    assert "if: needs.resolve-python-matrix.outputs.build_any == 'true'" in text
-    assert text.count("build_acs_python_wheel.sh") == 1
-    assert "Verify wheel tag and load native extension" in text
-    assert "python scripts/ci/smoke_acs_python_wheel.py" in text
-    assert "needs: [resolve-python-matrix, acs-python-wheels, acs-python-sdist]" in text
-    assert "Verify complete ACS Python distribution" in text
-    assert "python scripts/ci/verify_acs_python_dist.py" in text
-    assert "Attest wheel build provenance" in text
-    assert "Attest source distribution build provenance" in text
-    assert "Build and smoke test a wheel from the source distribution" in text
-    assert "CARGO_NET_OFFLINE=true python -m pip wheel" in text
-    assert "grep -Fq 'path = \"../../core\"'" in text
-    assert "name: pypi-agent-control-specification" in text
-    wheel_build = text[
-        text.index("acs-python-wheels:") : text.index("acs-python-sdist:")
-    ]
-    sdist_build = text[
-        text.index("acs-python-sdist:") : text.index("publish-acs-python:")
-    ]
-    acs_publish = text[text.index("publish-acs-python:") : text.index("build-python:")]
-    assert "attestations: write" in wheel_build
-    assert "attestations: write" in sdist_build
-    assert "contents: read" in acs_publish
-    assert "attestations: write" not in acs_publish
-    # skip-existing keeps re-runs idempotent after a partial upload (matches the sibling leg).
-    assert "skip-existing: true" in acs_publish
-    # Least-privilege: no publish job should request write access to repo contents.
-    assert "contents: write" not in text
 
 
 def test_release_manifest_generator_covers_artifact_families(tmp_path: Path) -> None:
@@ -416,8 +301,12 @@ def test_release_manifest_generator_covers_artifact_families(tmp_path: Path) -> 
     assert {"pypi", "npm", "nuget", "crates.io", "go", "oci"} <= ecosystems
     names = {artifact["name"] for artifact in manifest["artifacts"]}
     assert "agent-governance-toolkit-core" in names
-    assert "agent-control-specification-native-packages" in names
-    assert "AgentControlSpecification" in names
+    assert "agent-control-specification-native-packages" not in names
+    assert "AgentControlSpecification" not in names
+    assert not any(
+        artifact["source_path"].startswith("policy-engine/")
+        for artifact in manifest["artifacts"]
+    )
     assert "agentmesh" in names
     assert (
         "github.com/microsoft/agent-governance-toolkit/agent-governance-golang" in names
@@ -426,7 +315,7 @@ def test_release_manifest_generator_covers_artifact_families(tmp_path: Path) -> 
     automation = {artifact["automation"] for artifact in manifest["artifacts"]}
     assert automation <= set(manifest["automation_legend"])
     assert "github-actions" in automation
-    assert "policy-engine-ci-pack-only" in automation
+    assert "policy-engine-ci-pack-only" not in automation
     assert "manual-publish-needed" in automation
     assert manifest["dry_run"] is True
 

@@ -1,5 +1,5 @@
-# Supply-chain source policy for the agent-governance-rust workspace.
-# Mirrors policy-engine/deny.toml; enforced in CI by
+# Shared supply-chain source policy for all four Cargo manifest checks.
+# Enforced in CI by
 # .github/workflows/supply-chain-check.yml via `cargo deny check sources`,
 # so a git or non-crates.io dependency must be an explicit, reviewed choice.
 
