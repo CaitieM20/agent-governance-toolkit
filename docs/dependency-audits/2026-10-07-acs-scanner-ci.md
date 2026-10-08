@@ -50,9 +50,4 @@ CI continues to run only the deterministic `check sources` gate.
 
 No public API or runtime behavior changes. The risk is limited to CI coverage
 and release sequencing: in-tree ACS SDK build/test/package jobs are removed
-before the separate PR that retargets AGT consumers. Do not replace their
-consumer setup with the currently incompatible PyPI release. The downstream
-consumer CI migration must land with the manifest retarget in PR2 and use only
-a published, API-compatible package. During the coordinated rollout, the
-in-tree source-policy checks remain active until each retired manifest is
-removed, and the retained Rust/benchmark source-policy checks remain required.
+before the separate PR that retargets AGT consumers.
