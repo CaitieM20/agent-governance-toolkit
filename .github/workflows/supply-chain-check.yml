@@ -36,6 +36,7 @@ on:
       - 'scripts/tests/test_check_build_hooks.py'
       - 'scripts/tests/test_check_dependency_scorecard.py'
       - 'scripts/tests/test_supply_chain_common.py'
+      - 'tests/ci/test_acs_scanner_workflow.py'
       - '.github/workflows/supply-chain-check.yml'
 
 permissions:
@@ -64,7 +65,7 @@ jobs:
           set -euo pipefail
           CHANGED="$(git diff --name-only "origin/${BASE_REF}...HEAD")"
           SCANNER_HITS="$(printf '%s\n' "$CHANGED" \
-            | grep -E '^(scripts/(check_release_age|check_install_scripts|check_build_hooks|check_dependency_scorecard|_supply_chain_common)\.py|scripts/tests/test_(check_release_age|check_install_scripts|check_build_hooks|check_dependency_scorecard|supply_chain_common)\.py|\.github/workflows/supply-chain-check\.yml|(.*/)?deny\.toml)$' \
+            | grep -E '^(scripts/(check_release_age|check_install_scripts|check_build_hooks|check_dependency_scorecard|_supply_chain_common)\.py|scripts/tests/test_(check_release_age|check_install_scripts|check_build_hooks|check_dependency_scorecard|supply_chain_common)\.py|tests/ci/test_acs_scanner_workflow\.py|\.github/workflows/supply-chain-check\.yml|(.*/)?deny\.toml)$' \
             || true)"
           DEP_HITS="$(printf '%s\n' "$CHANGED" \
             | grep -E '(^|/)(package\.json|package-lock\.json|npm-shrinkwrap\.json|Cargo\.toml|Cargo\.lock|pyproject\.toml|requirements[^/]*\.txt|setup\.py|setup\.cfg|Pipfile|Pipfile\.lock|poetry\.lock|uv\.lock|.*\.csproj|packages\.config|go\.mod|go\.sum|build\.rs)$' \
@@ -306,9 +307,9 @@ jobs:
   # `check sources` so the gate stays deterministic and does not flake
   # on time-varying advisory data; advisories, licenses and bans are
   # intentionally left out of CI for now.
-  # Covers both Rust workspaces (policy-engine, agent-governance-rust) and
-  # the two standalone manifests (policy-engine/examples/coding_agent/app and
-  # the prompt-injection benchmark harness), which reuse policy-engine/deny.toml.
+  # All four manifest checks share agent-governance-rust/deny.toml. The
+  # policy-engine workspace and coding_agent example remain checked while
+  # their manifests exist, including before the ACS removal lands.
   # ------------------------------------------------------------------
   cargo-source-policy:
     name: Cargo source policy (cargo-deny)
@@ -334,11 +335,12 @@ jobs:
           install -m755 "$RUNNER_TEMP/${dir}/cargo-deny" "$RUNNER_TEMP/cargo-deny"
           echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
       - name: cargo deny check sources (policy-engine)
-        run: cargo-deny --manifest-path policy-engine/Cargo.toml --all-features check sources
+        if: ${{ hashFiles('policy-engine/Cargo.toml') != '' }}
+        run: cargo-deny --manifest-path policy-engine/Cargo.toml --config agent-governance-rust/deny.toml --all-features check sources
       - name: cargo deny check sources (agent-governance-rust)
-        run: cargo-deny --manifest-path agent-governance-rust/Cargo.toml --all-features check sources
-      # Standalone manifests outside the two workspaces reuse policy-engine/deny.toml.
+        run: cargo-deny --manifest-path agent-governance-rust/Cargo.toml --config agent-governance-rust/deny.toml --all-features check sources
       - name: cargo deny check sources (coding_agent example)
-        run: cargo-deny --manifest-path policy-engine/examples/coding_agent/app/Cargo.toml --config policy-engine/deny.toml --all-features check sources
+        if: ${{ hashFiles('policy-engine/examples/coding_agent/app/Cargo.toml') != '' }}
+        run: cargo-deny --manifest-path policy-engine/examples/coding_agent/app/Cargo.toml --config agent-governance-rust/deny.toml --all-features check sources
       - name: cargo deny check sources (prompt-injection benchmark harness)
-        run: cargo-deny --manifest-path benchmarks/prompt-injection/harness/agt-rules-baseline/Cargo.toml --config policy-engine/deny.toml --all-features check sources
+        run: cargo-deny --manifest-path benchmarks/prompt-injection/harness/agt-rules-baseline/Cargo.toml --config agent-governance-rust/deny.toml --all-features check sources

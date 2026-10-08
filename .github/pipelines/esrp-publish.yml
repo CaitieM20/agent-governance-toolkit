@@ -94,14 +94,8 @@ parameters:
         path: agent-governance-python/agent-rag-governance
       - name: agt-sandbox
         path: agent-governance-python/agent-sandbox
-      # ACS policy layer, Python SDK, and artifact generator
-      - name: agent-control-specification
-        path: policy-engine/sdk/python
       - name: agt-policies
         path: agent-governance-python/agt-policies
-      - name: acs-generator
-        path: policy-engine/generator
-        noBuildIsolation: 'true'
 
   - name: npmPackages
     type: object
@@ -136,93 +130,15 @@ parameters:
         path: agent-governance-python/agent-os/extensions/mcp-server
         nodeVersion: '20'
 
-  - name: acsNodeNativePackages
-    type: object
-    displayName: 'ACS Node native packages to publish'
-    default:
-      - name: agent-control-specification-linux-x64-gnu
-        binary: agent-control-specification.linux-x64-gnu.node
-        rustTarget: x86_64-unknown-linux-gnu
-        vmImage: ubuntu-latest
-      - name: agent-control-specification-linux-arm64-gnu
-        binary: agent-control-specification.linux-arm64-gnu.node
-        rustTarget: aarch64-unknown-linux-gnu
-        vmImage: ubuntu-latest
-        aptPackages: gcc-aarch64-linux-gnu
-        linkerEnv: CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER
-        linker: aarch64-linux-gnu-gcc
-      - name: agent-control-specification-darwin-x64
-        binary: agent-control-specification.darwin-x64.node
-        rustTarget: x86_64-apple-darwin
-        vmImage: macOS-latest
-      - name: agent-control-specification-darwin-arm64
-        binary: agent-control-specification.darwin-arm64.node
-        rustTarget: aarch64-apple-darwin
-        vmImage: macOS-latest
-      - name: agent-control-specification-win32-x64-msvc
-        binary: agent-control-specification.win32-x64-msvc.node
-        rustTarget: x86_64-pc-windows-msvc
-        vmImage: windows-latest
-
-  - name: acsNodeOpaPackages
-    type: object
-    displayName: 'ACS Node OPA packages to publish'
-    default:
-      - name: agent-control-specification-opa-linux-x64
-        platform: linux-x64
-      - name: agent-control-specification-opa-linux-arm64
-        platform: linux-arm64
-      - name: agent-control-specification-opa-darwin-x64
-        platform: darwin-x64
-      - name: agent-control-specification-opa-darwin-arm64
-        platform: darwin-arm64
-      - name: agent-control-specification-opa-win32-x64
-        platform: win32-x64
-
   - name: rustPackages
     type: object
     displayName: 'Rust crates to publish'
-    # Only crates with no unpublished workspace dependency are packaged and
-    # published here. A crate that depends on another crate from this run
-    # (agent-control-specification -> agent-control-specification-core;
-    # agentmesh -> BOTH agentmesh-mcp and agent-control-specification) is
-    # packaged and released later, in dependency order, in dedicated steps in
-    # the Publish_Rust stage.
+    # Crates with workspace dependencies are packaged later in dependency
+    # order in the Publish_Rust stage.
     default:
       - name: agentmesh-mcp
         path: agent-governance-rust
         crate: agentmesh-mcp
-      - name: agent-control-specification-core
-        path: policy-engine
-        crate: agent_control_specification_core
-
-  - name: acsDotnetNativeAssets
-    type: object
-    displayName: 'ACS .NET native runtime assets'
-    default:
-      - rid: linux-x64
-        nativeLib: libagent_control_specification.so
-        rustTarget: x86_64-unknown-linux-gnu
-        vmImage: ubuntu-latest
-      - rid: linux-arm64
-        nativeLib: libagent_control_specification.so
-        rustTarget: aarch64-unknown-linux-gnu
-        vmImage: ubuntu-latest
-        aptPackages: gcc-aarch64-linux-gnu
-        linkerEnv: CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER
-        linker: aarch64-linux-gnu-gcc
-      - rid: osx-x64
-        nativeLib: libagent_control_specification.dylib
-        rustTarget: x86_64-apple-darwin
-        vmImage: macOS-latest
-      - rid: osx-arm64
-        nativeLib: libagent_control_specification.dylib
-        rustTarget: aarch64-apple-darwin
-        vmImage: macOS-latest
-      - rid: win-x64
-        nativeLib: agent_control_specification.dll
-        rustTarget: x86_64-pc-windows-msvc
-        vmImage: windows-latest
 
 # -------------------------------------------------------
 # ESRP Configuration (Managed Identity / Workload Identity Federation)
@@ -264,7 +180,7 @@ pool:
 
 stages:
   # =======================================================
-  # PYTHON (PyPI) — AGT packages plus ACS policy/runtime packages
+  # PYTHON (PyPI) — AGT packages
   # =======================================================
   - stage: Build_PyPI
     displayName: 'Build Python Packages'
@@ -274,7 +190,6 @@ stages:
       - ${{ each pkg in parameters.pypiPackages }}:
         - job: Build_PyPI_${{ replace(pkg.name, '-', '_') }}
           displayName: 'Build ${{ pkg.name }}'
-          condition: and(succeeded(), ne('${{ pkg.name }}', 'agent-control-specification'))
           steps:
             - checkout: self
 
@@ -347,314 +262,6 @@ stages:
                 publishLocation: 'pipeline'
               displayName: 'Publish ${{ pkg.name }} artifacts'
 
-      - job: Build_PyPI_ACS_wheels
-        displayName: 'Build ACS Python wheel matrix'
-        strategy:
-          maxParallel: 5
-          matrix:
-            linux_x86_64:
-              platform: linux-x86_64
-              buildPlatform: linux-x86_64
-              target: x86_64-unknown-linux-gnu
-              vmImage: ubuntu-24.04
-              builder: manylinux
-              expectedWheel: '*manylinux_2_28_x86_64.whl'
-              macosDeploymentTarget: ''
-              smoke: 'true'
-            linux_aarch64:
-              platform: linux-aarch64
-              buildPlatform: linux-aarch64-cross
-              target: aarch64-unknown-linux-gnu
-              vmImage: ubuntu-24.04
-              builder: manylinux
-              expectedWheel: '*manylinux_2_28_aarch64.whl'
-              macosDeploymentTarget: ''
-              smoke: 'false'
-            macos_x86_64:
-              platform: macos-x86_64
-              buildPlatform: macos-x86_64
-              target: x86_64-apple-darwin
-              vmImage: macOS-15
-              builder: native
-              expectedWheel: '*macosx_10_12_x86_64.whl'
-              macosDeploymentTarget: '10.12'
-              smoke: 'true'
-            macos_arm64:
-              platform: macos-arm64
-              buildPlatform: macos-arm64
-              target: aarch64-apple-darwin
-              vmImage: macOS-15
-              builder: native
-              expectedWheel: '*macosx_11_0_arm64.whl'
-              macosDeploymentTarget: '11.0'
-              smoke: 'false'
-            windows_x86_64:
-              platform: windows-x86_64
-              buildPlatform: windows-x86_64
-              target: x86_64-pc-windows-msvc
-              vmImage: windows-2022
-              builder: native
-              expectedWheel: '*win_amd64.whl'
-              macosDeploymentTarget: ''
-              smoke: 'true'
-        pool:
-          vmImage: $(vmImage)
-        steps:
-          - checkout: self
-
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '${{ parameters.pythonVersion }}'
-            displayName: 'Use Python ${{ parameters.pythonVersion }}'
-
-          - bash: |
-              python -m pip install --no-cache-dir --disable-pip-version-check \
-                --require-hashes --no-deps \
-                -r "$(Build.SourcesDirectory)/.github/release-tools/release-tools.txt"
-            condition: and(succeeded(), eq(variables['builder'], 'native'), ne(variables['platform'], 'windows-x86_64'))
-            displayName: 'Install build tools (hash-pinned)'
-
-          - pwsh: |
-              python -m pip install --no-cache-dir --disable-pip-version-check --require-hashes --no-deps -r "$(Build.SourcesDirectory)\.github\release-tools\release-tools.txt"
-              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-            condition: and(succeeded(), eq(variables['platform'], 'windows-x86_64'))
-            displayName: 'Install Windows build tools (hash-pinned)'
-
-          - bash: |
-              set -euo pipefail
-              bash scripts/ci/install_pinned_rust.sh "$ACS_RUST_TARGET"
-            condition: and(succeeded(), eq(variables['builder'], 'native'), ne(variables['platform'], 'windows-x86_64'))
-            env:
-              ACS_RUST_TARGET: $(target)
-            displayName: 'Install checksum-verified Rust toolchain'
-
-          - pwsh: |
-              & "$(Build.SourcesDirectory)\scripts\ci\install_pinned_rust_windows.ps1" -Target $env:ACS_RUST_TARGET
-              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-            condition: and(succeeded(), eq(variables['platform'], 'windows-x86_64'))
-            env:
-              ACS_RUST_TARGET: $(target)
-            displayName: 'Install checksum-verified Windows Rust toolchain'
-
-          - bash: |
-              set -euo pipefail
-              rm -rf dist
-              if [ -n "$ACS_MACOSX_DEPLOYMENT_TARGET" ]; then
-                export MACOSX_DEPLOYMENT_TARGET="$ACS_MACOSX_DEPLOYMENT_TARGET"
-              fi
-              python -m maturin build \
-                --release \
-                --locked \
-                --target "$ACS_RUST_TARGET" \
-                --out dist \
-                --manifest-path Cargo.toml
-            condition: and(succeeded(), eq(variables['builder'], 'native'), ne(variables['platform'], 'windows-x86_64'))
-            env:
-              ACS_RUST_TARGET: $(target)
-              ACS_MACOSX_DEPLOYMENT_TARGET: $(macosDeploymentTarget)
-            workingDirectory: 'policy-engine/sdk/python'
-            displayName: 'Build native ACS Python wheel'
-
-          - pwsh: |
-              Remove-Item -Recurse -Force dist -ErrorAction SilentlyContinue
-              python -m maturin build --release --locked --target $env:ACS_RUST_TARGET --out dist --manifest-path Cargo.toml
-              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-            condition: and(succeeded(), eq(variables['platform'], 'windows-x86_64'))
-            env:
-              ACS_RUST_TARGET: $(target)
-            workingDirectory: 'policy-engine/sdk/python'
-            displayName: 'Build native ACS Python Windows wheel'
-
-          - bash: |
-              set -euo pipefail
-              bash "$(Build.SourcesDirectory)/scripts/ci/build_acs_python_wheel.sh" \
-                "$(Build.SourcesDirectory)" "$ACS_BUILD_PLATFORM" false
-            condition: and(succeeded(), eq(variables['builder'], 'manylinux'))
-            env:
-              ACS_BUILD_PLATFORM: $(buildPlatform)
-            displayName: 'Build manylinux ACS Python wheel'
-
-          - bash: |
-              set -euo pipefail
-              shopt -s nullglob
-              wheels=(policy-engine/sdk/python/dist/*.whl)
-              if [ "${#wheels[@]}" -ne 1 ]; then
-                echo "##[error]Expected one ACS wheel, found ${#wheels[@]}"
-                exit 1
-              fi
-              case "$(basename "${wheels[0]}")" in
-                $EXPECTED_WHEEL) ;;
-                *) echo "##[error]Unexpected ACS wheel tag: $(basename "${wheels[0]}")"; exit 1 ;;
-              esac
-            condition: and(succeeded(), ne(variables['platform'], 'windows-x86_64'))
-            env:
-              EXPECTED_WHEEL: $(expectedWheel)
-            displayName: 'Verify ACS Python wheel tag'
-
-          - pwsh: |
-              $wheels = @(Get-ChildItem "policy-engine\sdk\python\dist\*.whl")
-              if ($wheels.Count -ne 1) {
-                  throw "Expected one ACS wheel, found $($wheels.Count)"
-              }
-              if ($wheels[0].Name -notlike $env:EXPECTED_WHEEL) {
-                  throw "Unexpected ACS wheel tag: $($wheels[0].Name)"
-              }
-            condition: and(succeeded(), eq(variables['platform'], 'windows-x86_64'))
-            env:
-              EXPECTED_WHEEL: $(expectedWheel)
-            displayName: 'Verify ACS Python Windows wheel tag'
-
-          - bash: |
-              set -euo pipefail
-              wheel=$(find policy-engine/sdk/python/dist -maxdepth 1 -type f -name '*.whl' -print -quit)
-              python scripts/ci/smoke_acs_python_wheel.py "$wheel"
-            condition: and(succeeded(), eq(variables['smoke'], 'true'), ne(variables['platform'], 'windows-x86_64'))
-            displayName: 'Smoke test ACS Python wheel'
-
-          - pwsh: |
-              $wheel = Get-ChildItem "policy-engine\sdk\python\dist\*.whl" | Select-Object -First 1
-              python scripts\ci\smoke_acs_python_wheel.py $wheel.FullName
-              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-            condition: and(succeeded(), eq(variables['smoke'], 'true'), eq(variables['platform'], 'windows-x86_64'))
-            displayName: 'Smoke test ACS Python Windows wheel'
-
-          - task: PublishPipelineArtifact@1
-            inputs:
-              targetPath: 'policy-engine/sdk/python/dist'
-              artifact: 'acs-python-wheel-$(platform)'
-              publishLocation: 'pipeline'
-            displayName: 'Publish ACS Python wheel artifact'
-
-      - job: Build_PyPI_ACS_sdist
-        displayName: 'Build ACS Python source distribution'
-        pool:
-          vmImage: ubuntu-24.04
-        steps:
-          - checkout: self
-
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '${{ parameters.pythonVersion }}'
-            displayName: 'Use Python ${{ parameters.pythonVersion }}'
-
-          - script: |
-              python -m pip install --no-cache-dir --disable-pip-version-check \
-                --require-hashes --no-deps \
-                -r $(Build.SourcesDirectory)/.github/release-tools/release-tools.txt
-            displayName: 'Install build tools (hash-pinned)'
-
-          - bash: |
-              set -euo pipefail
-              bash scripts/ci/install_pinned_rust.sh
-            displayName: 'Install checksum-verified Rust toolchain'
-
-          - bash: |
-              set -euo pipefail
-              rm -rf dist
-              cargo fetch --locked --manifest-path Cargo.toml
-              python -m maturin sdist --out dist --manifest-path Cargo.toml
-            workingDirectory: 'policy-engine/sdk/python'
-            displayName: 'Build ACS Python source distribution'
-
-          - bash: |
-              set -euo pipefail
-              shopt -s nullglob
-              sdists=(dist/*.tar.gz)
-              if [ "${#sdists[@]}" -ne 1 ]; then
-                echo "##[error]Expected one ACS source distribution, found ${#sdists[@]}"
-                exit 1
-              fi
-              sdist_listing="$(tar -tzf "${sdists[0]}")"
-              grep -Eq '/core/src/lib.rs$' <<<"$sdist_listing"
-              sdist_cargo_toml="$(tar --wildcards -xOf "${sdists[0]}" '*/sdk/python/Cargo.toml')"
-              grep -Fq 'path = "../../core"' <<<"$sdist_cargo_toml"
-              rm -rf sdist-wheel
-              CARGO_NET_OFFLINE=true python -m pip wheel \
-                --disable-pip-version-check \
-                --no-deps \
-                --no-build-isolation \
-                --wheel-dir sdist-wheel \
-                "${sdists[0]}"
-              wheels=(sdist-wheel/*.whl)
-              if [ "${#wheels[@]}" -ne 1 ]; then
-                echo "##[error]Expected one wheel from the ACS sdist, found ${#wheels[@]}"
-                exit 1
-              fi
-              python "$(Build.SourcesDirectory)/scripts/ci/smoke_acs_python_wheel.py" "${wheels[0]}"
-            workingDirectory: 'policy-engine/sdk/python'
-            displayName: 'Build and smoke test a wheel from the ACS source distribution'
-
-          - task: PublishPipelineArtifact@1
-            inputs:
-              targetPath: 'policy-engine/sdk/python/dist'
-              artifact: 'acs-python-sdist'
-              publishLocation: 'pipeline'
-            displayName: 'Publish ACS Python source distribution artifact'
-
-      - job: Aggregate_PyPI_ACS
-        displayName: 'Aggregate ACS Python distribution'
-        dependsOn:
-          - Build_PyPI_ACS_wheels
-          - Build_PyPI_ACS_sdist
-        steps:
-          - checkout: self
-
-          - task: UsePythonVersion@0
-            inputs:
-              versionSpec: '${{ parameters.pythonVersion }}'
-            displayName: 'Use Python ${{ parameters.pythonVersion }}'
-
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifact: 'acs-python-wheel-linux-x86_64'
-              targetPath: '$(Pipeline.Workspace)/acs-python-dist'
-            displayName: 'Download ACS Python Linux x86_64 wheel'
-
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifact: 'acs-python-wheel-linux-aarch64'
-              targetPath: '$(Pipeline.Workspace)/acs-python-dist'
-            displayName: 'Download ACS Python Linux ARM64 wheel'
-
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifact: 'acs-python-wheel-macos-x86_64'
-              targetPath: '$(Pipeline.Workspace)/acs-python-dist'
-            displayName: 'Download ACS Python macOS x86_64 wheel'
-
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifact: 'acs-python-wheel-macos-arm64'
-              targetPath: '$(Pipeline.Workspace)/acs-python-dist'
-            displayName: 'Download ACS Python macOS ARM64 wheel'
-
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifact: 'acs-python-wheel-windows-x86_64'
-              targetPath: '$(Pipeline.Workspace)/acs-python-dist'
-            displayName: 'Download ACS Python Windows x86_64 wheel'
-
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifact: 'acs-python-sdist'
-              targetPath: '$(Pipeline.Workspace)/acs-python-dist'
-            displayName: 'Download ACS Python source distribution'
-
-          - bash: |
-              set -euo pipefail
-              dist='$(Pipeline.Workspace)/acs-python-dist'
-              python scripts/ci/verify_acs_python_dist.py "$dist" \
-                --pyproject policy-engine/sdk/python/pyproject.toml
-            displayName: 'Verify complete ACS Python distribution'
-
-          - task: PublishPipelineArtifact@1
-            inputs:
-              targetPath: '$(Pipeline.Workspace)/acs-python-dist'
-              artifact: 'pypi-agent-control-specification'
-              publishLocation: 'pipeline'
-            displayName: 'Publish complete ACS Python distribution'
-
-  # Publish prerequisites before consumers; unrelated packages stay parallel.
   - stage: Publish_PyPI
     displayName: 'Publish All Packages to PyPI'
     dependsOn: Build_PyPI
@@ -665,8 +272,6 @@ stages:
           displayName: 'Publish ${{ pkg.name }} to PyPI'
           dependsOn:
             - ${{ each prerequisite in parameters.pypiPackages }}:
-              - ${{ if and(eq(prerequisite.name, 'agent-control-specification'), or(eq(pkg.name, 'agt-policies'), eq(pkg.name, 'acs-generator'))) }}:
-                - Publish_PyPI_${{ replace(prerequisite.name, '-', '_') }}
               - ${{ if and(eq(prerequisite.name, 'agt-policies'), eq(pkg.name, 'agent-governance-toolkit-core')) }}:
                 - Publish_PyPI_${{ replace(prerequisite.name, '-', '_') }}
               - ${{ if and(eq(prerequisite.name, 'agent-governance-toolkit-core'), or(eq(pkg.name, 'agent-governance-toolkit-cli'), eq(pkg.name, 'agent-governance-toolkit-integrations'), eq(pkg.name, 'agent-governance-toolkit-protocols'))) }}:
@@ -701,7 +306,7 @@ stages:
                 domaintenantid: '$(MICROSOFT_TENANT_ID)'
 
   # =======================================================
-  # NPM — AGT packages plus ACS SDK/native support packages
+  # NPM — AGT packages
   # =======================================================
   - stage: Build_npm
     displayName: 'Build & Pack npm Packages'
@@ -753,128 +358,6 @@ stages:
                 publishLocation: 'pipeline'
               displayName: 'Publish ${{ pkg.name }} artifact'
 
-      - job: Build_npm_agent_control_specification
-        displayName: 'Build agent-control-specification'
-        steps:
-          - checkout: self
-
-          - task: UseNode@1
-            inputs:
-              version: '${{ parameters.nodeVersion }}'
-
-          - script: |
-              rustup toolchain install ${{ parameters.rustVersion }} --profile minimal
-              rustup default ${{ parameters.rustVersion }}
-              rustc --version
-              cargo --version
-            workingDirectory: 'policy-engine/sdk/node'
-            displayName: 'Install Rust ${{ parameters.rustVersion }}'
-
-          - script: npm ci --ignore-scripts --legacy-peer-deps
-            workingDirectory: 'policy-engine/sdk/node'
-            displayName: 'Install ACS Node dependencies'
-
-          - script: npm run build
-            workingDirectory: 'policy-engine/sdk/node'
-            displayName: 'Build agent-control-specification'
-
-          - script: |
-              mkdir -p $(Pipeline.Workspace)/npm-out
-              npm pack --pack-destination $(Pipeline.Workspace)/npm-out
-              if ! ls $(Pipeline.Workspace)/npm-out/*.tgz 1>/dev/null 2>&1; then
-                echo "##[error]No .tgz found for agent-control-specification"
-                exit 1
-              fi
-              if tar -tzf $(Pipeline.Workspace)/npm-out/agent-control-specification-*.tgz | grep -E '^package/dist/.*\.node$'; then
-                echo "##[error]Root agent-control-specification package must not embed a host-specific native addon"
-                exit 1
-              fi
-            workingDirectory: 'policy-engine/sdk/node'
-            displayName: 'Pack agent-control-specification'
-
-          - task: PublishPipelineArtifact@1
-            inputs:
-              targetPath: '$(Pipeline.Workspace)/npm-out'
-              artifact: 'npm-agent-control-specification'
-              publishLocation: 'pipeline'
-            displayName: 'Publish agent-control-specification artifact'
-
-      - ${{ each native in parameters.acsNodeNativePackages }}:
-        - job: Build_npm_${{ replace(native.name, '-', '_') }}
-          displayName: 'Build ${{ native.name }}'
-          pool:
-            vmImage: '${{ native.vmImage }}'
-          steps:
-            - checkout: self
-
-            - task: UseNode@1
-              inputs:
-                version: '${{ parameters.nodeVersion }}'
-
-            - bash: |
-                set -euo pipefail
-                if [ -n "${{ coalesce(native.aptPackages, '') }}" ]; then
-                  sudo apt-get update
-                  sudo apt-get install -y ${{ native.aptPackages }}
-                fi
-                rustup toolchain install ${{ parameters.rustVersion }} --profile minimal
-                rustup default ${{ parameters.rustVersion }}
-                rustup target add ${{ native.rustTarget }}
-                rustc --version
-                cargo --version
-              workingDirectory: 'policy-engine/sdk/node'
-              displayName: 'Install Rust ${{ parameters.rustVersion }}'
-
-            - script: npm ci --ignore-scripts --legacy-peer-deps
-              workingDirectory: 'policy-engine/sdk/node'
-              displayName: 'Install ACS Node dependencies'
-
-            - bash: |
-                set -euo pipefail
-                if [ -n "${{ coalesce(native.linkerEnv, '') }}" ]; then
-                  export ${{ native.linkerEnv }}="${{ native.linker }}"
-                fi
-                npx napi build --platform --release --target ${{ native.rustTarget }} --js native.js --dts native.d.ts
-                test -s "${{ native.binary }}"
-                mkdir -p "$(Pipeline.Workspace)/npm-out"
-                node scripts/package-native.mjs \
-                  --package "${{ native.name }}" \
-                  --binary "${{ native.binary }}" \
-                  --pack-destination "$(Pipeline.Workspace)/npm-out"
-              workingDirectory: 'policy-engine/sdk/node'
-              displayName: 'Pack ${{ native.name }}'
-
-            - task: PublishPipelineArtifact@1
-              inputs:
-                targetPath: '$(Pipeline.Workspace)/npm-out'
-                artifact: 'npm-${{ native.name }}'
-                publishLocation: 'pipeline'
-              displayName: 'Publish ${{ native.name }} artifact'
-
-      - job: Build_npm_agent_control_specification_opa
-        displayName: 'Build ACS OPA npm packages'
-        steps:
-          - checkout: self
-
-          - task: UseNode@1
-            inputs:
-              version: '${{ parameters.nodeVersion }}'
-
-          - ${{ each opa in parameters.acsNodeOpaPackages }}:
-            - script: |
-                node ../../scripts/fetch-opa.mjs --platform ${{ opa.platform }}
-                mkdir -p $(Pipeline.Workspace)/npm-out
-                npm pack --pack-destination $(Pipeline.Workspace)/npm-out
-              workingDirectory: 'policy-engine/sdk/node/npm/${{ opa.name }}'
-              displayName: 'Pack ${{ opa.name }}'
-
-          - task: PublishPipelineArtifact@1
-            inputs:
-              targetPath: '$(Pipeline.Workspace)/npm-out'
-              artifact: 'npm-agent-control-specification-opa'
-              publishLocation: 'pipeline'
-            displayName: 'Publish ACS OPA npm artifacts'
-
   - stage: Publish_npm
     displayName: 'Publish to npm via ESRP'
     dependsOn: Build_npm
@@ -889,25 +372,6 @@ stages:
                 artifact: 'npm-${{ pkg.name }}'
                 targetPath: '$(Pipeline.Workspace)/npm-publish'
               displayName: 'Download ${{ pkg.name }}'
-
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifact: 'npm-agent-control-specification'
-              targetPath: '$(Pipeline.Workspace)/npm-publish'
-            displayName: 'Download agent-control-specification'
-
-          - ${{ each native in parameters.acsNodeNativePackages }}:
-            - task: DownloadPipelineArtifact@2
-              inputs:
-                artifact: 'npm-${{ native.name }}'
-                targetPath: '$(Pipeline.Workspace)/npm-publish'
-              displayName: 'Download ${{ native.name }}'
-
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifact: 'npm-agent-control-specification-opa'
-              targetPath: '$(Pipeline.Workspace)/npm-publish'
-            displayName: 'Download ACS OPA npm packages'
 
           - script: |
               echo "=== All packages to publish ==="
@@ -936,7 +400,7 @@ stages:
               domaintenantid: '$(MICROSOFT_TENANT_ID)'
 
   # =======================================================
-  # NUGET — Microsoft.AgentGovernance plus ACS .NET packages
+  # NUGET — Microsoft.AgentGovernance packages
   # =======================================================
   - stage: Build_NuGet
     displayName: 'Build & Test .NET SDK'
@@ -996,127 +460,6 @@ stages:
               publishLocation: 'pipeline'
             displayName: 'Publish unsigned NuGet artifacts'
 
-      - ${{ each native in parameters.acsDotnetNativeAssets }}:
-        - job: Build_ACS_Native_${{ replace(native.rid, '-', '_') }}
-          displayName: 'Build ACS .NET native asset ${{ native.rid }}'
-          pool:
-            vmImage: '${{ native.vmImage }}'
-          steps:
-            - checkout: self
-
-            - bash: |
-                set -euo pipefail
-                if [ -n "${{ coalesce(native.aptPackages, '') }}" ]; then
-                  sudo apt-get update
-                  sudo apt-get install -y ${{ native.aptPackages }}
-                fi
-                rustup toolchain install ${{ parameters.rustVersion }} --profile minimal
-                rustup default ${{ parameters.rustVersion }}
-                rustup target add ${{ native.rustTarget }}
-                if [ -n "${{ coalesce(native.linkerEnv, '') }}" ]; then
-                  export ${{ native.linkerEnv }}="${{ native.linker }}"
-                fi
-                cargo build --release \
-                  -p agent_control_specification \
-                  --features opa,bundled-dispatchers \
-                  --target ${{ native.rustTarget }} \
-                  --manifest-path policy-engine/Cargo.toml
-                mkdir -p "$(Pipeline.Workspace)/acs-dotnet-native/${{ native.rid }}/native"
-                cp "policy-engine/target/${{ native.rustTarget }}/release/${{ native.nativeLib }}" \
-                  "$(Pipeline.Workspace)/acs-dotnet-native/${{ native.rid }}/native/${{ native.nativeLib }}"
-                ls -la "$(Pipeline.Workspace)/acs-dotnet-native/${{ native.rid }}/native"
-              displayName: 'Build native library ${{ native.rid }}'
-
-            - task: PublishPipelineArtifact@1
-              inputs:
-                targetPath: '$(Pipeline.Workspace)/acs-dotnet-native'
-                artifact: 'acs-dotnet-native-${{ native.rid }}'
-                publishLocation: 'pipeline'
-              displayName: 'Publish ACS native asset ${{ native.rid }}'
-
-      - job: BuildAndPack_ACS
-        displayName: 'Build, Test, Pack ACS .NET SDK'
-        dependsOn:
-          - Build_ACS_Native_linux_x64
-          - Build_ACS_Native_linux_arm64
-          - Build_ACS_Native_osx_x64
-          - Build_ACS_Native_osx_arm64
-          - Build_ACS_Native_win_x64
-        steps:
-          - checkout: self
-
-          - task: UseDotNet@2
-            inputs:
-              packageType: 'sdk'
-              version: '${{ parameters.dotnetVersion }}'
-            displayName: 'Use .NET SDK ${{ parameters.dotnetVersion }}'
-
-          - ${{ each native in parameters.acsDotnetNativeAssets }}:
-            - task: DownloadPipelineArtifact@2
-              inputs:
-                artifact: 'acs-dotnet-native-${{ native.rid }}'
-                targetPath: '$(Build.SourcesDirectory)/policy-engine/sdk/dotnet/src/AgentControlSpecification/runtimes'
-              displayName: 'Download ACS native asset ${{ native.rid }}'
-
-          - script: |
-              curl --proto '=https' --tlsv1.2 -fSLo "$(Pipeline.Workspace)/opa" \
-                --retry 5 --retry-all-errors --retry-delay 5 --connect-timeout 20 \
-                "https://openpolicyagent.org/downloads/v0.70.0/opa_linux_amd64_static"
-              echo "00d114b94fdb1606a48cccdfc73c9ccdc62c38721150131ae578d5ff3df5c084  $(Pipeline.Workspace)/opa" | sha256sum -c -
-              chmod +x "$(Pipeline.Workspace)/opa"
-              echo "##vso[task.prependpath]$(Pipeline.Workspace)"
-              echo "##vso[task.setvariable variable=ACS_OPA_PATH]$(Pipeline.Workspace)/opa"
-              "$(Pipeline.Workspace)/opa" version
-            displayName: 'Install OPA for ACS .NET tests'
-
-          - script: |
-              dotnet build AgentControlSpecification.sln \
-                --configuration Release \
-                -p:AgentControlSpecificationSkipNativeBuild=true
-            workingDirectory: 'policy-engine/sdk/dotnet'
-            displayName: 'Build ACS .NET SDK'
-
-          - script: |
-              dotnet run --project tests/AgentControlSpecification.Tests \
-                --configuration Release \
-                --no-build
-            workingDirectory: 'policy-engine/sdk/dotnet'
-            displayName: 'Run ACS .NET tests'
-
-          - script: |
-              dotnet pack src/AgentControlSpecification/AgentControlSpecification.csproj \
-                --configuration Release \
-                --no-build \
-                -p:AgentControlSpecificationSkipNativeBuild=true \
-                --output ./nupkg
-              dotnet pack src/AgentControlSpecification.AI/AgentControlSpecification.AI.csproj \
-                --configuration Release \
-                --no-build \
-                --output ./nupkg
-              dotnet pack src/AgentControlSpecification.AgentFramework/AgentControlSpecification.AgentFramework.csproj \
-                --configuration Release \
-                --no-build \
-                --output ./nupkg
-              dotnet pack src/AgentControlSpecification.AutoGen/AgentControlSpecification.AutoGen.csproj \
-                --configuration Release \
-                --no-build \
-                --output ./nupkg
-              dotnet pack src/AgentControlSpecification.SemanticKernel/AgentControlSpecification.SemanticKernel.csproj \
-                --configuration Release \
-                --no-build \
-                --output ./nupkg
-              echo "=== Packed ACS NuGet artifacts ==="
-              ls -la ./nupkg/
-            workingDirectory: 'policy-engine/sdk/dotnet'
-            displayName: 'Pack ACS NuGet packages'
-
-          - task: PublishPipelineArtifact@1
-            inputs:
-              targetPath: 'policy-engine/sdk/dotnet/nupkg'
-              artifact: 'nuget-acs-unsigned'
-              publishLocation: 'pipeline'
-            displayName: 'Publish unsigned ACS NuGet artifacts'
-
   - stage: Publish_NuGet
     displayName: 'Sign & Publish to NuGet.org'
     dependsOn: Build_NuGet
@@ -1138,12 +481,6 @@ stages:
               artifact: 'nuget-unsigned'
               targetPath: '$(Pipeline.Workspace)\nuget-unsigned'
             displayName: 'Download unsigned NuGet artifacts'
-
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifact: 'nuget-acs-unsigned'
-              targetPath: '$(Pipeline.Workspace)\nuget-unsigned'
-            displayName: 'Download unsigned ACS NuGet artifacts'
 
           - powershell: |
               Write-Host "=== Unsigned packages ==="
@@ -1259,7 +596,7 @@ stages:
             displayName: 'Push signed package to NuGet.org'
 
   # =======================================================
-  # RUST (crates.io) — AgentMesh plus ACS crates
+  # RUST (crates.io) — AgentMesh crates
   # =======================================================
   - stage: Build_Rust
     displayName: 'Build & Test Rust Crates'
@@ -1299,17 +636,6 @@ stages:
                 "$HOME/.cargo/bin/rustc" --version
                 "$HOME/.cargo/bin/cargo" --version
               displayName: 'Install Rust ${{ parameters.rustVersion }}'
-
-            - script: |
-                curl --proto '=https' --tlsv1.2 -fSLo "$(Pipeline.Workspace)/opa" \
-                  --retry 5 --retry-all-errors --retry-delay 5 --connect-timeout 20 \
-                  "https://openpolicyagent.org/downloads/v0.70.0/opa_linux_amd64_static"
-                echo "00d114b94fdb1606a48cccdfc73c9ccdc62c38721150131ae578d5ff3df5c084  $(Pipeline.Workspace)/opa" | sha256sum -c -
-                chmod +x "$(Pipeline.Workspace)/opa"
-                echo "##vso[task.prependpath]$(Pipeline.Workspace)"
-                "$(Pipeline.Workspace)/opa" version
-              condition: eq('${{ pkg.path }}', 'policy-engine')
-              displayName: 'Install OPA for ACS tests'
 
             - script: |
                 cargo build --release --workspace
@@ -1391,15 +717,8 @@ stages:
                 mainpublisher: 'ESRPRELPACMAN'
                 domaintenantid: '$(MICROSOFT_TENANT_ID)'
 
-          # A crate that depends on another crate released in this run cannot
-          # be packaged until every dependency reaches the crates.io index.
-          # agent-control-specification depends on
-          # agent-control-specification-core (released above); agentmesh
-          # depends on BOTH agentmesh-mcp (released above) and
-          # agent-control-specification, so agentmesh must be packaged and
-          # released last. Overall order: agentmesh-mcp,
-          # agent-control-specification-core, agent-control-specification,
-          # agentmesh.
+          # agentmesh depends on agentmesh-mcp, so it is packaged after that
+          # crate has been published to the crates.io index.
           - checkout: self
 
           - script: |
@@ -1423,48 +742,6 @@ stages:
               "$HOME/.cargo/bin/rustc" --version
               "$HOME/.cargo/bin/cargo" --version
             displayName: 'Install Rust ${{ parameters.rustVersion }} for late crate packaging'
-
-          - script: |
-              set -euo pipefail
-              mkdir -p "$(Pipeline.Workspace)/rust-publish/agent-control-specification"
-              for ATTEMPT in 1 2 3 4 5; do
-                if cargo package -p agent_control_specification --allow-dirty; then
-                  break
-                fi
-                if [ "$ATTEMPT" = "5" ]; then
-                  exit 1
-                fi
-                echo "cargo package agent_control_specification failed (its dependencies may not be resolvable from crates.io yet); retrying..."
-                sleep 30
-              done
-              cp target/package/agent_control_specification-*.crate "$(Pipeline.Workspace)/rust-publish/agent-control-specification/"
-              find "$(Pipeline.Workspace)/rust-publish/agent-control-specification" -name "*.crate" -type f -print
-              EMPTY=$(find "$(Pipeline.Workspace)/rust-publish/agent-control-specification" -name "*.crate" -type f -empty)
-              if [ -n "$EMPTY" ]; then
-                echo "##[error]Zero-byte .crate file(s): $EMPTY"
-                exit 1
-              fi
-            workingDirectory: 'policy-engine'
-            displayName: 'Package agent-control-specification crate'
-
-          - task: EsrpRelease@11
-            displayName: 'ESRP Publish agent-control-specification to crates.io'
-            inputs:
-              connectedservicename: 'AGT-ESRP-Signing'
-              usemanagedidentity: true
-              keyvaultname: '$(ESRP_KEYVAULT_NAME)'
-              signcertname: '$(ESRP_RELEASE_CERT_IDENTIFIER)'
-              clientid: '$(ESRP_CLIENT_ID)'
-              intent: 'PackageDistribution'
-              contenttype: 'Rust'
-              contentsource: 'Folder'
-              folderlocation: '$(Pipeline.Workspace)/rust-publish/agent-control-specification'
-              waitforreleasecompletion: true
-              owners: '$(ESRP_OWNERS)'
-              approvers: '$(ESRP_APPROVERS)'
-              serviceendpointurl: 'https://api.esrp.microsoft.com'
-              mainpublisher: 'ESRPRELPACMAN'
-              domaintenantid: '$(MICROSOFT_TENANT_ID)'
 
           - script: |
               set -euo pipefail

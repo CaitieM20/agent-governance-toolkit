@@ -370,8 +370,6 @@ def build_outputs(actions: dict[str, str] | None = None) -> dict[Path, str]:
         actions = _load_actions(ACTIONS_PATH)
     manifest = _load_toml(MANIFEST_PATH)
     workflows = manifest.get("workflow", [])
-    if not workflows:
-        raise GenerationError("manifest defines no [[workflow]] entries")
     outputs: dict[Path, str] = {}
     seen_ids: set[str] = set()
     for workflow in workflows:
