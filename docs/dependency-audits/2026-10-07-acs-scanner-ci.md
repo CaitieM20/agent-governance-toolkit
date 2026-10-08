@@ -7,7 +7,9 @@ owner: agt-maintainers
 # ACS scanner and CI consolidation audit
 
 AGT plans to remove the in-repository `policy-engine/` implementation and
-consume compatible packages from the standalone ACS project instead. This
+consume compatible packages from the
+[standalone ACS project](https://github.com/responsibleai/agent-control-spec)
+instead. This
 change prepares for that removal by consolidating the identical Cargo
 source-policy configurations into `agent-governance-rust/deny.toml` and
 removing policy-engine build, test, packaging, and publishing jobs from CI
