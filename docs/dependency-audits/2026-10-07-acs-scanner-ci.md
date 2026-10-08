@@ -22,8 +22,8 @@ manifest paths while they exist and skips only those exact steps after their
 removal. The agent-governance Rust workspace and prompt-injection benchmark
 checks remain unconditional. Every remaining check explicitly selects the
 shared source-policy file. The scanner/dependency co-modification trip-wire
-is unchanged in purpose and its regression tests cover scanner-only,
-dependency-only, and combined path cases.
+is unchanged. Validation covers scanner-only, dependency-only, and combined
+path cases without adding a new test file.
 
 Standalone-consumer CI installation is intentionally not added here. The
 AGT Python consumer currently requires `agent-control-specification>=0.4.0b0`,
