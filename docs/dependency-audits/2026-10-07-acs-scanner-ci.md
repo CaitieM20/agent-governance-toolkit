@@ -6,16 +6,27 @@ owner: agt-maintainers
 
 # ACS scanner and CI consolidation audit
 
+AGT plans to remove the in-repository `policy-engine/` implementation and
+consume compatible packages from the standalone ACS project instead. This
+change prepares for that removal by consolidating the identical Cargo
+source-policy configurations into `agent-governance-rust/deny.toml` and
+removing policy-engine build, test, packaging, and publishing jobs from CI
+and release automation. It does not remove the implementation or retarget
+AGT's consumer dependencies.
+
 ## Which dependencies changed and why
 
 No dependencies, dependency manifests, lockfiles, vendored content, or runtime
-implementation change. The Cargo source-policy scanner now uses
-`agent-governance-rust/deny.toml` for each checked manifest, and the duplicate
-`policy-engine/deny.toml` is removed. The generated in-tree `policy-engine-ci`
-workflow and its generator source are removed. GitHub Actions and ESRP release
-workflows no longer build, package, or publish ACS artifacts from the in-tree
-Rust, Python, Node, or .NET SDK directories; the release manifest no longer
-lists artifacts from those directories.
+implementation change. Both `deny.toml` files had identical policy settings;
+the retained configuration preserves those settings, and the duplicate
+`policy-engine/deny.toml` is removed. Every Cargo source-policy check now
+explicitly selects the retained configuration, so removing `policy-engine/`
+later will not remove the policy used by AGT's Rust workspace or benchmark.
+
+The generated `policy-engine-ci` workflow and its source definition are
+removed. GitHub Actions and ESRP release workflows no longer build, package,
+or publish ACS artifacts from the in-tree Rust, Python, Node, or .NET SDK
+directories; the release manifest no longer lists those artifacts.
 
 The `cargo-source-policy` check continues to inspect the two policy-engine
 manifest paths while they exist and skips only those exact steps after their
