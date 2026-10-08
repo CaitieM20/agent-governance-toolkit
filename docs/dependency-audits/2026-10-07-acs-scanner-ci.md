@@ -38,16 +38,6 @@ shared source-policy file. The scanner/dependency co-modification trip-wire
 is unchanged. Validation covers scanner-only, dependency-only, and combined
 path cases without adding a new test file.
 
-Standalone-consumer CI installation is intentionally not added here. The
-AGT Python consumer currently requires `agent-control-specification>=0.4.0b0`,
-while the published PyPI package is only `0.3.1b1`; installing that older
-release would not satisfy the requirement or establish API compatibility. The
-standalone Rust crate is a separate package and API. PR2 must retarget the
-consumer manifests and consumer CI together once a compatible standalone
-release is available. Until then, AGT's existing consumer tests retain their
-current source-based setup; this PR does not guess a package version or
-fabricate compatibility.
-
 ## Security advisory relevance
 
 No dependency versions changed, so this change introduces no new CVE or
