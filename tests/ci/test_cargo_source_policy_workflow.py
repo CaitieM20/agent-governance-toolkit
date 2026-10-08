@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
-"""Regression tests for the ACS cargo source-policy workflow."""
+"""Regression tests for AGT's Cargo source-policy workflow."""
 
 from __future__ import annotations
 
@@ -38,7 +38,7 @@ def test_scanner_only_change_passes_tripwire() -> None:
             ".github/workflows/supply-chain-check.yml",
             "agent-governance-rust/deny.toml",
             "policy-engine/deny.toml",
-            "tests/ci/test_acs_scanner_workflow.py",
+            "tests/ci/test_cargo_source_policy_workflow.py",
         ]
     )
 
